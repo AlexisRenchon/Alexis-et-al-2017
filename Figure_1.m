@@ -1,3 +1,6 @@
+% Clear the workspace
+clear;
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Load input data
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -8,7 +11,7 @@
 
 % Load processed data (netCDF file)
 % Location of processed input file 
-source_processed = '\\ad.uws.edu.au\dfshare\HomesHWK$\90929058\My Documents\GitHub\Alexis et al 2017 input\CumberlandPlain_2014_L6_EP_moderate.nc';
+source_processed = 'Input\CumberlandPlain_2014_L6_EP_moderate.nc';
 % Information on file, including variable name
 finfo = ncinfo(source_processed);
 % Read variable from .cd file
@@ -27,13 +30,13 @@ VPD = ncread(source_processed,'VPD'); VPD = reshape(VPD,[],1);
 clearvars source_processed finfo;
 
 % Daily data from Summary .xls
-source_summary = '\\ad.uws.edu.au\dfshare\HomesHWK$\90929058\My Documents\GitHub\Alexis et al 2017 input\CumberlandPlain_2014_L6_EP_moderate_Summary.xlsx';
+source_summary = 'Input\CumberlandPlain_2014_L6_EP_moderate_Summary.xlsx';
 Data_sum = readtable(source_summary,'Sheet','Daily (all)','Range','A3:AI1097','ReadVariableNames',false);
 daily_date_cell = Data_sum.Var1;
 daily_date = datetime(daily_date_cell,'InputFormat','dd/MM/yyyy hh:mm:ss a');
 ER_solo_daily = Data_sum.Var7;
 ET_daily = Data_sum.Var8;
-GPP_solo_daily = Data_sum.Var20;
+GPP_solo_daily = -Data_sum.Var20;
 NEE_solo_daily = Data_sum.Var23;
 Precip_daily = Data_sum.Var27;
 clearvars daily_date_cell Data_sum source_summary;
@@ -41,7 +44,7 @@ clearvars daily_date_cell Data_sum source_summary;
 % LAI data
 % Load raw data (.csv file)
 % Location of raw input file
-source_LAI = '\\ad.uws.edu.au\dfshare\HomesHWK$\90929058\My Documents\GitHub\Alexis et al 2017 input\CUP_LAI_20161021.csv';
+source_LAI = 'Input\CUP_LAI_20161021.csv';
 % Create datastore to access collection of data
 ds_LAI = datastore(source_LAI);
 % Select variable of interest
@@ -58,7 +61,7 @@ clearvars LAI_Data ds_LAI source_LAI;
 % PAR data
 % Load raw data (.csv file)
 % Location of raw input file
-source_PAR = '\\ad.uws.edu.au\dfshare\HomesHWK$\90929058\My Documents\GitHub\Alexis et al 2017 input\FACELawn_FACE_diffPAR_20142017_clean.csv';
+source_PAR = 'Input\FACELawn_FACE_diffPAR_20142017_clean.csv';
 % Create datastore to access collection of data
 ds_PAR = datastore(source_PAR);
 % Select variable of interest
@@ -144,17 +147,23 @@ hold on;
 binplot(datenum(DateTime_LAI),LAI,6,'k');
 title('Canopy dynamic'); ylabel('LAI (m^-^2m^-^2)');
 
+i = 1;
+for y = 1:3
+    for m = 1:12
+        month_dt(i) = datetime(2013+y,0+m,1);
+        i = i+1;
+    end
+end
+month_dt(37) = datetime(2017,1,1);
+
 for i = 1:5
     subplot(5,1,i); hold on;
     plot([min(datenum(DateTime_CUP)) max(datenum(DateTime_CUP))], [0 0],'k');
     plot([min(datenum(DateTime_CUP)) max(datenum(DateTime_CUP))], [0 0],'k');
-    axis([min(datenum(DateTime_CUP)) max(datenum(DateTime_CUP)) yaxismin(i) yaxismax(i)]);
-    ax = gca; set(ax,'FontSize',16); box on;
-    ax.XTick = [datenum(datetime(2013,08,01)) datenum(datetime(2013,12,01)) datenum(datetime(2014,04,01)) ...
-            datenum(datetime(2014,08,01)) datenum(datetime(2014,12,01)) datenum(datetime(2015,04,01)) ...
-            datenum(datetime(2015,08,01)) datenum(datetime(2015,12,01)) datenum(datetime(2016,04,01)) ...
-            datenum(datetime(2016,08,01))];
-    datetick('x','mmm yyyy','keeplimits','keepticks');
+    axis([datenum(datetime(2014,1,1)) datenum(datetime(2017,1,1)) yaxismin(i) yaxismax(i)]);
+    ax = gca; set(ax,'FontSize',14); box on;
+    ax.XTick = datenum(month_dt);
+    datetick('x','myy','keeplimits','keepticks');
     if i ~= 5
     	set(gca,'xticklabel',[]);
     end
