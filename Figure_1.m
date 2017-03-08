@@ -5,7 +5,7 @@ clear;
 % Load input data
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% InpuDateTime_CUP to load
+% Inputs to load
 % Daily_ER daily_NEE daily_GPP daily_date SWC_s VPD Ta Ts DateTime_CUP
 % Precip_daily DateTime_LAI DateTime_PAR LAI PAR
 
@@ -108,12 +108,12 @@ for i = 1:5
         x2 = datenum(datetime(yeari,08,31));
         x = [x1 x2 x2 x1];
         y = [yaxismin(i) yaxismin(i) yaxismax(i) yaxismax(i)];
-        patch(x,y,'k','FaceAlpha',.2,'EdgeColor','none');
+        patch(x,y,'k','FaceAlpha',.1,'EdgeColor','none');
         x1 = datenum(datetime(yeari,10,01));
         x2 = datenum(datetime(yeari+1,02,30));
         x = [x1 x2 x2 x1];
         y = [yaxismin(i) yaxismin(i) yaxismax(i) yaxismax(i)];
-        patch(x,y,'k','FaceAlpha',.5,'EdgeColor','none');
+        patch(x,y,'k','FaceAlpha',.2,'EdgeColor','none');
     end
     text(0.90,0.98,Panel_num(i),'Units', 'Normalized', 'VerticalAlignment', 'Top');
 end
