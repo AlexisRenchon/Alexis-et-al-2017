@@ -59,8 +59,7 @@ es = 0.61078.*exp((17.269.*t_air)./(237.3+t_air));
 % s, [kPa/K]
 s = es.*(17.269./(237.3+t_air)).*(1-(t_air./(237.3+t_air)));
 
-% Rn is net radiation, loaded from measured met data, [unit?] do I need to
-% change the unit from [W/m2] to [?]?
+% Rn is net radiation, loaded from measured met data, [W/m2]
 
 % pa is the density of dry air, [kg/m3]
 pa = 1.2041; % at 20 °C and 101 kPa -do I need a t_air dependent pa?
@@ -69,8 +68,6 @@ pa = 1.2041; % at 20 °C and 101 kPa -do I need a t_air dependent pa?
 
 % psv is the temperature dependent latent heat of vaporization, [J/kg]
 psv = 2.5005.*(10.^6) - 2.359.*(10.^3).*(t_air+237.15);
-% latent heat of vaporization [J/kg]
-psv_ct = 2260;
 
 % cp is the specific heat capacity for dry air, [J kg K-1]
 cp = 1004.7; 
@@ -82,17 +79,11 @@ ps = (1.61.*cp.*P)./psv;
 k = 0.40; % Von Karman Constant [unitless]
 h = 20; % canopy height [m]
 z = 30; % measurement height [m]
-ga = (ws.*(k.^2))./((log((z-0.67.*h)./(0.1.*h))).^2);
-
-% e is the change latent heat content relative to the change of sensible
-% heat content of saturated air [kPa/K]
-% e ?
+ga = (ws.*(k.^2))./((log((z-(0.67).*h)./((0.1).*h))).^2);
 
 % Canopy conductance [m s-1] from Penman-Monteith [Monteith, 1965]
-% Eq. found in Knauer 2015
-ET_mmpers = ET/3600; % [mm/s]
-gc = (ps.*psv.*ET_mmpers.*ga)./(e.*Rn + pa.*cp.*vpd.*ga - psv.*(e+psv).*ET_mmpers);
-% I still need e...
+% Eq. found in Knauer 2015 -epsilom is s
+gc = (ps.*Fe.*ga)./(s.*Rn + pa.*cp.*vpd.*ga - Fe.*(s+psv));
 
 
 % Novick 2016 supplement: "zm is the measurement height,
