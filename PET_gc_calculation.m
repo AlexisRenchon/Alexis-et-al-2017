@@ -62,18 +62,18 @@ s = es.*(17.269./(237.3+t_air)).*(1-(t_air./(237.3+t_air)));
 % Rn is net radiation, loaded from measured met data, [W/m2]
 
 % pa is the density of dry air, [kg/m3]
-pa = 1.2041; % at 20 °C and 101 kPa -do I need a t_air dependent pa?
+pa = (P.*1000)./(287.058.*(t_air+237.3)); 
 
 % P is air pressure, loaded from met data, [kPa]
 
 % psv is the temperature dependent latent heat of vaporization, [J/kg]
-psv = 2.5005.*(10.^6) - 2.359.*(10.^3).*(t_air+237.15);
+psv = (2.501-0.00237.*t_air).*1000000;
 
-% cp is the specific heat capacity for dry air, [J kg K-1]
-cp = 1004.7; 
+% cp is the specific heat capacity for dry air, [J kg-1 K-1]
+cp = 1004.834; 
 
 % ps is the temperature-dependent psychrometric constant, [kPa K-1]
-ps = (1.61.*cp.*P)./psv;
+ps = (cp.*P)./(0.622.*psv);
 
 % ga is the aerodynamic conductance, [m/s]
 k = 0.40; % Von Karman Constant [unitless]
@@ -83,7 +83,7 @@ ga = (ws.*(k.^2))./((log((z-(0.67).*h)./((0.1).*h))).^2);
 
 % Canopy conductance [m s-1] from Penman-Monteith [Monteith, 1965]
 % Eq. found in Knauer 2015 -epsilom is s
-gc = (ps.*Fe.*ga)./(s.*Rn + pa.*cp.*vpd.*ga - Fe.*(s+psv));
+gc = (ps.*Fe.*ga)./(s.*Rn + pa.*cp.*vpd.*ga - Fe.*(s+ps));
 
 
 % Novick 2016 supplement: "zm is the measurement height,
@@ -93,7 +93,14 @@ gc = (ps.*Fe.*ga)./(s.*Rn + pa.*cp.*vpd.*ga - Fe.*(s+psv));
 % gs is the highest value of the reference,
 % well-watered surface conductance rate observed
 % across the study domain", 
-gs = 0.0148; % [m/s] for now... I need to know how to calculate it
+gs = 0.0148; % [m/s] for now... need to modify this accordingly, see below
+
+% gs = gc when AGC is good, qc is good, VPD > 0.9 & VPD < 1.1, wet soil
+% (quantile > 0.8 maybe), 
+% days with rainfall and the two subsequent
+% dayswere excluded if precipitation exceeded 0.2mm(day with rainfall), 0.5mm(day before), or 1mm
+% (2 days before).
+
 % PET calculation, penman monteith
 PET = (s.*Rn+cp.*pa.*ga.*vpd)./(psv.*(s+ps.*(1+(ga./gs)))); % [unit?]
 PET = PET*3600; % from [mm s-1] to [mm]
