@@ -34,9 +34,7 @@ hour_t = ncread(source_processed,'Hour'); hour_t = reshape(hour_t,[],1);
 minute_t = ncread(source_processed,'Minute'); minute_t = reshape(minute_t,[],1);
 second_t = ncread(source_processed,'Second'); second_t = reshape(second_t,[],1);
 DateTime_CUP = datetime(year_t,month_t,day_t,hour_t,minute_t,second_t);
-% SWC_s = ncread(source_processed,'Sws'); SWC_s = reshape(SWC_s,[],1); SWC_s = SWC_s*100;
-vpd = ncread(source_processed,'VPD'); vpd = reshape(vpd,[],1); 
-% tsoil = ncread(source_processed,'Ts'); tsoil = reshape(tsoil,[],1); 
+vpd = ncread(source_processed,'VPD'); vpd = reshape(vpd,[],1);  
 t_air = ncread(source_processed,'Ta'); t_air = reshape(t_air,[],1); 
 ws = ncread(source_processed,'Ws'); ws = reshape(ws,[],1);
 Rn = ncread(source_processed,'Fn'); Rn = reshape(Rn,[],1);
@@ -45,8 +43,32 @@ P = ncread(source_processed,'ps'); P = reshape(P,[],1);
 ET = ncread(source_processed,'ET'); ET = reshape(ET,[],1);
 Fe = ncread(source_processed,'Fe'); Fe = reshape(Fe,[],1);
 Fh  = ncread(source_processed,'Fh'); Fh = reshape(Fh,[],1);
+SWC  = ncread(source_processed,'Sws'); SWC = reshape(SWC,[],1);
 % clear unused variables
 clearvars source_processed finfo;
+
+% Load raw data (.csv file)
+% Location of raw input file
+source_raw = 'Input\CUP_EddyPro_QC_170207.csv';
+% Create datastore to access collection of data
+ds_raw = datastore(source_raw);
+% Select variable of interest
+ds_raw.SelectedVariableNames = {'DateTime','NEE_c','qc_Sc','AGC_c','daytime','qc_co2_flux','qc_h2o_flux','u_','h2o_flux'}; % for example
+% Read selected variables, save it in the workspace as a table
+Raw_Data = readall(ds_raw);
+% Get data from the table, change format if necessary
+NEE_c = Raw_Data.NEE_c;
+qc = Raw_Data.qc_co2_flux;
+qc_h2o_flux = Raw_Data.qc_h2o_flux;
+h2o_flux = Raw_Data.h2o_flux;
+qc_Sc = Raw_Data.qc_Sc;
+AGC_c = Raw_Data.AGC_c;
+daytime = Raw_Data.daytime;
+u = Raw_Data.u_;
+DateTime_CUP_cell = Raw_Data.DateTime;
+t_s = datetime(DateTime_CUP_cell,'InputFormat','dd/MM/yyyy HH:mm');
+% clear unused variables
+clearvars DateTime_CUP_cell Raw_Data ds_raw source_raw; 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Data processing and analysis
@@ -93,7 +115,13 @@ gc = (ps.*Fe.*ga)./(s.*Rn + pa.*cp.*vpd.*ga - Fe.*(s+ps));
 % gs is the highest value of the reference,
 % well-watered surface conductance rate observed
 % across the study domain", 
-gs = 0.0148; % [m/s] for now... need to modify this accordingly, see below
+
+% need to add the input to load
+% need to add filter after rain event
+binedges = quantile(SWC,0:1/6:1);
+use = find(vpd > 0.9 & vpd < 1.1 & qc_h2o_flux == 0 & AGC_c == 0 & u > 0.2 & daytime == 1 & SWC > binedges(6));
+gs = mean(gc(use));
+
 
 % gs = gc when AGC is good, qc is good, VPD > 0.9 & VPD < 1.1, wet soil
 % (quantile > 0.8 maybe), 
@@ -113,3 +141,9 @@ PET_pt = PET_pt*3600; % from [mm s-1] to [mm]
 PET_m_ET = PET-ET;
 DI = sum(PET)/sum(ET);
 % figure; scatter(vpd,PET_m_ET);
+
+% figure; hold on;
+% for i = 1:6
+%     use = find(vpd > 0.8 & qc_h2o_flux == 0 & AGC_c == 0 & u > 0.2 & daytime == 1 & SWC > binedges(i) & SWC < binedges(i+1));
+%     binplot(vpd(use),gc(use)/gs,8,[1/i 1/i 1]);
+% end

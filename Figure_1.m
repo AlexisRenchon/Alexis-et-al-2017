@@ -125,9 +125,11 @@ GPPplot = plot(daily_date,GPP_solo_daily,'LineStyle','none','Marker','o', ...
     'MarkerFaceColor','g','MarkerEdgeColor','none','MarkerSize',4);
 NEEplot = plot(daily_date,NEE_solo_daily,'LineStyle','none','Marker','o', ...
     'MarkerFaceColor','k','MarkerEdgeColor','none','MarkerSize',4);
-ylabel('Flux (gCm^-^2d^-^1)');
+ETplot = plot(daily_date,ET_daily,'LineStyle','none','Marker','o', ...
+    'MarkerFaceColor','b','MarkerEdgeColor','none','MarkerSize',4);
+ylabel('Flux (gCm^-^2d^-^1) or (mm)');
 %legend([NEEplot ERplot GPPplot],'NEE','ER','GPP','Location','northouDateTime_CUPide','Orientation','horizontal');
-title('Daily C flux');
+title('Daily flux');
 
 subplot(5,1,2); 
 hold on;
@@ -171,6 +173,7 @@ end
 
 % For some weird reason, I have to run the following part AFTER the first
 % part
+
 
 subplot(5,1,2); hold on;
 ax = gca;
