@@ -103,87 +103,52 @@ for i = 25:n
    Precip_halfdayago(i) = sum(Precip(i-24:i)); 
 end
 
-% PAR saturated ET and NEE vs VPD, for dry and wet soil (50% quantile), in summer
-n = 5;
-ET_m = NaN(2,n,3); 
-GEP_m = NaN(2,n,3); 
-WUE_m = NaN(2,n,3); 
+% PAR saturated (> 800) ET, GEP and WUE vs VPD, for SWC quantiles (n quantiles)
+figure; hold on;
 for s = 1:2 % 2 seasons, winter or summer
     if s == 1
-        this_season = find(Precip_2daysago < 1 & Precip_1daysago < 0.5 & Precip_halfdayago < 0.2 & Month_t >= 5 & Month_t <= 8 & daytime == 1 & qc == 0 & u > 0.2 & AGC_c == 0 & qc_Sc == 0 & NEE_c > -20 & NEE_c < 15); % winter daytime
+        %this_season = find(Precip_2daysago < 1 & Precip_1daysago < 0.5 & Precip_halfdayago < 0.2 & Month_t >= 5 & Month_t <= 8 & daytime == 1 & qc == 0 & qc_h20_flux == 0 & u > 0.2 & AGC_c == 0 & qc_Sc == 0 & NEE_c > -20 & NEE_c < 15 & PAR > 1000); % winter daytime
+        this_season = find(Month_t >= 5 & Month_t <= 8 & daytime == 1 & qc == 0 & qc_h2o_flux == 0 & u > 0.2 & AGC_c == 0 & qc_Sc == 0 & NEE_c > -20 & NEE_c < 15 & PAR > 800); % winter daytime
     elseif s == 2
-        this_season = find(Precip_2daysago < 1 & Precip_1daysago < 0.5 & Precip_halfdayago < 0.2 & (Month_t >= 10 | Month_t <= 2) & daytime == 1 & qc == 0 & u > 0.2 & AGC_c == 0 & qc_Sc == 0 & NEE_c > -20 & NEE_c < 15); % summer daytime
+        %this_season = find(Precip_2daysago < 1 & Precip_1daysago < 0.5 & Precip_halfdayago < 0.2 & (Month_t >= 10 | Month_t <= 2) & daytime == 1 & qc == 0  & qc_h20_flux == 0 & u > 0.2 & AGC_c == 0 & qc_Sc == 0 & NEE_c > -20 & NEE_c < 15 & PAR > 1000); % summer daytime
+        this_season = find((Month_t >= 10 | Month_t <= 2) & daytime == 1 & qc == 0  & qc_h2o_flux == 0 & u > 0.2 & AGC_c == 0 & qc_Sc == 0 & NEE_c > -20 & NEE_c < 15 & PAR > 800); % summer daytime
     end
     GEP_s = GEP(this_season); 
     ET_s = ET(this_season);
+    WUE_s = GEP_s./ET_s;
     PAR_s = PAR(this_season);
     SWC_ss = SWC_s(this_season);
     VPD_s = VPD_30(this_season);
-    VPD_binedges = quantile(VPD_s,0:1/n:1); %* n bins of driver class, by quantile (n bins with same amount of data) 
+    %VPD_binedges = quantile(VPD_s,0:1/n:1); %* n bins of driver class, by quantile (n bins with same amount of data) 
     SWC_binedges = quantile(SWC_ss,0:1/3:1); % 3 quantiles of SWC
-    for i=1:n %* n bins/quantile
-        for j = 1:3 % 3 SWC quantile
-        % driver_bin_middle(s,d,i) = (driver_binedges(i) + driver_binedges(i+1))/2; 
-            this_bin = find(SWC_ss >= SWC_binedges(j) & SWC_ss <= SWC_binedges(j+1) & VPD_s >= VPD_binedges(i) & VPD_s <= VPD_binedges(i+1)); %* iteration change driver and SWC class 
-            x_median(s,i,j) = median(VPD_s(this_bin));
-            if length(this_bin) >= 10 
-                ET_m(s,i,j) = median(ET(this_bin));  
-                GEP_m(s,i,j) = median(GEP(this_bin)); 
-                WUE_m(s,i,j) = median(GEP(this_bin))/median(ET(this_bin)); 
-            end
-            if GEP_m(s,i,j) == 0
-                GEP_m(s,i,j) = NaN;
-            end
-            if ET_m(s,i,j) == 0
-                ET_m(s,i,j) = NaN;
-            end
-            if WUE_m(s,i,j) == 0
-                WUE_m(s,i,j) = NaN;
-            end
+    c = 0.8; % dark blue/red is wet soil
+    for j = 1:3 % SWC
+        if s == 1
+            colors = [c c 1];
+        elseif s == 2
+            colors = [1 c c];
         end
+        c = c - 0.4;
+        this_bin = find(SWC_ss >= SWC_binedges(j) & SWC_ss <= SWC_binedges(j+1)); %* iteration change SWC
+        subplot(3,1,1); 
+        binplot(VPD_s(this_bin),GEP_s(this_bin),3,colors);
+        subplot(3,1,2); 
+        binplot(VPD_s(this_bin),ET_s(this_bin),3,colors);
+        subplot(3,1,3);
+        binplot(VPD_s(this_bin),WUE_s(this_bin),3,colors);
     end
 end
 
-figure;
-for s = 1:2 % winter and summer
-    for p = 1:3 % ET, GEP, WUE
-        if p == 1 
-            ydata = GEP_m;
-            %conf_sup = Alpha_sup;
-            %conf_inf = Alpha_inf;
-        elseif p == 2
-            ydata = ET_m;
-            %conf_sup = Beta_sup;
-            %conf_inf = Beta_inf;
-        elseif p == 3
-            ydata = WUE_m;
-            %conf_sup = Rd_sup;
-            %conf_inf = Rd_inf;
-        end
-        c = 0.8; % dark blue/red is wet soil
-        for j = 1:3 % SWC
-            if s == 1
-                colors = [c c 1];
-            elseif s == 2
-                colors = [1 c c];
-            end
-            c = c - 0.4;
-            for i = 1:n % n bins/quantile for each driver
-                ydata_i(1,i) = ydata(s,i,j);
-                %conf_sup_i(1,i) = conf_sup(s,i,j);
-                %conf_inf_i(1,i) = conf_inf(s,i,j);
-                xdata_i(1,i) = x_median(s,i,j);
-            end
-            subplot(3,1,p); hold on; % 1st subplot is Alpha, tsoil, 2nd is Alpha, SWC, ...
-            plot(xdata_i,ydata_i,'LineWidth',3,'Marker','o','MarkerEdgeColor', ...
-    'none','MarkerFaceColor',colors,'Color',colors,'MarkerSize',10);
-            %x = driver_bin_middle_i;
-            %X = [x fliplr(x)];
-            %y1 = conf_inf_i; y2 = conf_sup_i;
-            %Y = [y1 fliplr(y2)];
-            %fill(X,Y,colors,'FaceAlpha',0.15,'EdgeAlpha',0.0); 
-        end
-    end
+subplot(3,1,1); hold on; ylabel('GEP (\mumol m^-^2 s^-^1)'); box off;
+ax = gca; ax.XTick = 0:1:4; ax.YTick = 4:2:16; ax.FontSize = 14; set(gca,'xticklabel',[]); ylim([4 16]);
+subplot(3,1,2); hold on; ylabel('ET (mm)'); box off;
+ax = gca; ax.XTick = 0:1:4; ax.YTick = 0.05:0.05:0.2; ax.FontSize = 14; set(gca,'xticklabel',[]); ylim([0.05 0.2]);
+subplot(3,1,3); hold on; ylabel('WUE (\mumolm^-^2 mm^-^1)'); xlabel('VPD (kPa)'); box off;
+ax = gca; ax.XTick = 0:1:4; ax.YTick = 50:50:150; ax.FontSize = 14; ylim([50 150]);
+labelp = {'(a)','(b)','(c)'};
+for i = 1:3
+    subplot(3,1,i); hold on;
+    text(0.90,0.98,labelp(i),'Units', 'Normalized', 'VerticalAlignment', 'Top');
+    %sub_pos = get(gca,'position'); % get subplot axis position
+    %set(gca,'position',sub_pos.*[1.2 1.2 1 1]) % stretch its width and height
 end
-
-
