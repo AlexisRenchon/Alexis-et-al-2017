@@ -7,7 +7,7 @@ function [coeffs,confint_95] = LRFIT_param_confint(x,y,condition)
 
 %% Fit: 'Winter'.    
 [xData, yData] = prepareCurveData( x(condition), y(condition) );
-if length(xData(xData<100)) < 8 % enough data close to PAR = 0 
+if length(xData(xData<500)) < 8 % enough data close to PAR = 0 
     coeffs = NaN;
     confint_95 = NaN;
 else

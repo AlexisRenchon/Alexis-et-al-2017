@@ -44,6 +44,7 @@ ET = ncread(source_processed,'ET'); ET = reshape(ET,[],1);
 Fe = ncread(source_processed,'Fe'); Fe = reshape(Fe,[],1);
 Fh  = ncread(source_processed,'Fh'); Fh = reshape(Fh,[],1);
 SWC  = ncread(source_processed,'Sws'); SWC = reshape(SWC,[],1);
+Precip  = ncread(source_processed,'Precip'); Precip = reshape(Precip,[],1);
 % clear unused variables
 clearvars source_processed finfo;
 
@@ -116,21 +117,50 @@ gc = (ps.*Fe.*ga)./(s.*Rn + pa.*cp.*vpd.*ga - Fe.*(s+ps));
 % well-watered surface conductance rate observed
 % across the study domain", 
 
-% need to add the input to load
-% need to add filter after rain event
-binedges = quantile(SWC,0:1/6:1);
-use = find(vpd > 0.9 & vpd < 1.1 & qc_h2o_flux == 0 & AGC_c == 0 & u > 0.2 & daytime == 1 & SWC > binedges(6));
-gs = mean(gc(use));
+% filter after rain event
+% Rain in the past 2 days, 1 day and 12 hour
+n = length(Precip);
+Precip_2daysago = NaN(n,1); % 96 half-hour (2 days)
+Precip_1daysago = NaN(n,1); % 48 half-hour (1 day)
+Precip_halfdayago = NaN(n,1); % 24 half-hour (12 hour)
+for i = 97:n
+   Precip_2daysago(i) = sum(Precip(i-96:i)); 
+end
+for i = 49:n
+   Precip_1daysago(i) = sum(Precip(i-48:i)); 
+end
+for i = 25:n
+   Precip_halfdayago(i) = sum(Precip(i-24:i)); 
+end
+
+% rain in the past 2 days lower than 1mm
+% rain in the past 24 hour lower than 0.5 mm
+% rain in the past 12 hour lower than 0.2 mm
+use = find(Precip_2daysago < 1 & Precip_1daysago < 0.5 & Precip_halfdayago < 0.2); 
+% 2014-2016 at CUP, this is 60% of the data
+
+% 6 quantiles of SWC for rain filtered data
+binedges_f = quantile(SWC(use),0:1/6:1);
+% 6 quantiles of SWC for all data
+binedges_nof = quantile(SWC,0:1/6:1);
+% ref,ww condition for rain filtered data
+use_f = find(Precip_2daysago < 1 & Precip_1daysago < 0.5 & Precip_halfdayago < 0.2 & vpd > 0.9 & vpd < 1.3 & qc_h2o_flux == 0 & AGC_c == 0 & u > 0.2 & daytime == 1 & SWC > binedges_f(6) & gc > 0);
+% ref,ww condition for all data
+use_nof = find(vpd > 0.9 & vpd < 1.3 & qc_h2o_flux == 0 & AGC_c == 0 & u > 0.2 & daytime == 1 & SWC > binedges_nof(6) & gc > 0);
+% gs,ref,ww for rain filtered data
+gs_f = mean(gc(use_f));
+% gs,ref,ww for all data
+gs_nof = mean(gc(use_nof));
 
 
 % gs = gc when AGC is good, qc is good, VPD > 0.9 & VPD < 1.1, wet soil
 % (quantile > 0.8 maybe), 
-% days with rainfall and the two subsequent
+% gs_f: days with rainfall and the two subsequent
 % dayswere excluded if precipitation exceeded 0.2mm(day with rainfall), 0.5mm(day before), or 1mm
 % (2 days before).
 
 % PET calculation, penman monteith
-PET = (s.*Rn+cp.*pa.*ga.*vpd)./(psv.*(s+ps.*(1+(ga./gs)))); % [unit?]
+PET = (s.*Rn+cp.*pa.*ga.*vpd)./(psv.*(s+ps.*(1+(ga./gs_nof)))); % [unit?]
 PET = PET*3600; % from [mm s-1] to [mm]
 % PET_pt, Priestley-Taylor
 PET_pt = 1.26.*(((s.*Rn)./(s+ps)).*(1./psv));
@@ -139,11 +169,18 @@ PET_pt = PET_pt*3600; % from [mm s-1] to [mm]
 % if PET is [mm s-1], to go to [mm] we simply do *3600 second
 
 PET_m_ET = PET-ET;
-DI = sum(PET)/sum(ET);
+DI = sum(PET)/sum(Precip);
 % figure; scatter(vpd,PET_m_ET);
 
-% figure; hold on;
-% for i = 1:6
-%     use = find(vpd > 0.8 & qc_h2o_flux == 0 & AGC_c == 0 & u > 0.2 & daytime == 1 & SWC > binedges(i) & SWC < binedges(i+1));
-%     binplot(vpd(use),gc(use)/gs,8,[1/i 1/i 1]);
-% end
+figure; hold on;
+for i = 1:6
+    use = find(Precip_2daysago < 1 & Precip_1daysago < 0.5 & Precip_halfdayago < 0.2 & vpd > 0.9 & qc_h2o_flux == 0 & AGC_c == 0 & u > 0.2 & daytime == 1 & SWC > binedges_f(i) & SWC < binedges_f(i+1) & gc > 0);
+    binplot(vpd(use),gc(use)/gs_f,5,[1/i 1/i 1]);
+end
+ax = gca;
+ax.FontSize = 14;
+xlabel('VPD (kPa)');
+ylabel('Relative surface conductance');
+
+
+clearvars n i 
