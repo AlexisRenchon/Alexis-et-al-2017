@@ -27,13 +27,13 @@ source_processed = 'Input\CumberlandPlain_2014_L6_EP_moderate.nc';
 % Information on file, including variable name
 finfo = ncinfo(source_processed);
 % Read variable from .cd file
-year_t = ncread(source_processed,'Year'); year_t = reshape(year_t,[],1);
-month_t = ncread(source_processed,'Month'); month_t = reshape(month_t,[],1);
-day_t = ncread(source_processed,'Day'); day_t = reshape(day_t,[],1);
-hour_t = ncread(source_processed,'Hour'); hour_t = reshape(hour_t,[],1);
-minute_t = ncread(source_processed,'Minute'); minute_t = reshape(minute_t,[],1);
-second_t = ncread(source_processed,'Second'); second_t = reshape(second_t,[],1);
-DateTime_CUP = datetime(year_t,month_t,day_t,hour_t,minute_t,second_t);
+Year_t = ncread(source_processed,'Year'); Year_t = reshape(Year_t,[],1);
+Month_t = ncread(source_processed,'Month'); Month_t = reshape(Month_t,[],1);
+Day_t = ncread(source_processed,'Day'); Day_t = reshape(Day_t,[],1);
+Hour_t = ncread(source_processed,'Hour'); Hour_t = reshape(Hour_t,[],1);
+Minute_t = ncread(source_processed,'Minute'); Minute_t = reshape(Minute_t,[],1);
+Second_t = ncread(source_processed,'Second'); Second_t = reshape(Second_t,[],1);
+DateTime_CUP = datetime(Year_t,Month_t,Day_t,Hour_t,Minute_t,Second_t);
 vpd = ncread(source_processed,'VPD'); vpd = reshape(vpd,[],1);  
 t_air = ncread(source_processed,'Ta'); t_air = reshape(t_air,[],1); 
 ws = ncread(source_processed,'Ws'); ws = reshape(ws,[],1);
@@ -173,12 +173,29 @@ DI = sum(PET)/sum(Precip);
 % figure; scatter(vpd,PET_m_ET);
 
 figure; hold on;
-for i = 1:6
-    use = find(Precip_2daysago < 1 & Precip_1daysago < 0.5 & Precip_halfdayago < 0.2 & vpd > 0.9 & qc_h2o_flux == 0 & AGC_c == 0 & u > 0.2 & daytime == 1 & SWC > binedges_f(i) & SWC < binedges_f(i+1) & gc > 0);
-    binplot(vpd(use),gc(use)/gs_f,5,[1/i 1/i 1]);
+for s = 1:2
+    if s == 1
+        this_season = find(Month_t >= 5 & Month_t <= 8 & Precip_2daysago < 1 & Precip_1daysago < 0.5 & Precip_halfdayago < 0.2 & vpd > 0.9 & qc_h2o_flux == 0 & AGC_c == 0 & u > 0.2 & daytime == 1 & gc > 0); % winter daytime
+    elseif s == 2
+        this_season = find((Month_t >= 10 | Month_t <= 2) & Precip_2daysago < 1 & Precip_1daysago < 0.5 & Precip_halfdayago < 0.2 & vpd > 0.9 & qc_h2o_flux == 0 & AGC_c == 0 & u > 0.2 & daytime == 1 & gc > 0); % summer daytime
+    end
+    SWC_ss = SWC(this_season);
+    VPD_s = vpd(this_season);
+    gc_relative_s = gc(this_season)/gs_f;
+    SWC_s_binedges = quantile(SWC_ss,0:1/3:1); % 3 quantiles of SWC
+    c = 0.8; % dark blue/red is wet soil
+    for j = 1:3 % SWC
+        if s == 1
+            colors = [c c 1];
+        elseif s == 2
+            colors = [1 c c];
+        end
+        c = c - 0.4;
+        this_bin = find(SWC_ss >= SWC_s_binedges(j) & SWC_ss <= SWC_s_binedges(j+1)); %* iteration change SWC
+        binplot(VPD_s(this_bin),gc_relative_s(this_bin),4,colors);
+    end
 end
-ax = gca;
-ax.FontSize = 14;
+ax = gca; ax.FontSize = 16; xlim([0.5 4.5]); ylim([0.1 1.1]); ax.YTick = 0.1:0.2:1.1; ax.XTick = 0.5:1:4.5;
 xlabel('VPD (kPa)');
 ylabel('Relative surface conductance');
 
