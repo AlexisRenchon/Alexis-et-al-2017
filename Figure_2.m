@@ -87,22 +87,53 @@ for yeari = 2013:2016
     end
 end
 
+wintercolor = [0.7 0.7 1];
+summercolor = [1 0.7 0.7];
+
 %plots
 these_winter = find(Month_d >= 5 & Month_d <= 8);
 these_summer = find(Month_d >= 10 | Month_d <= 2);
-figure; subplot(2,2,1); hold on; scatter(Min_Ta(these_winter),NEE_d(these_winter),'b','filled');
-scatter(Min_Ta(these_summer),NEE_d(these_summer),'r','filled');
-plot([0 25],[0 0],'k','LineWidth',2); xlabel('Min Ta (°C)'); ylabel ('NEE (gC m^-^2 d^-^1)'); ax = gca; set(ax,'FontSize',16);
-axis([0 25 -5 5]);
-subplot(2,2,2); hold on; scatter(Max_VPD(these_winter),NEE_d(these_winter),'b','filled');
-scatter(Max_VPD(these_summer),NEE_d(these_summer),'r','filled');
-plot([0 10],[0 0],'k','LineWidth',2); xlabel('Max VPD (kPa)'); ylabel ('NEE (gC m^-^2 d^-^1)'); ax = gca; set(ax,'FontSize',16);
-axis([0 10 -5 5]);
-subplot(2,2,3); hold on; scatter(Mean_PAR(these_winter),NEE_d(these_winter),'b','filled');
-scatter(Mean_PAR(these_summer),NEE_d(these_summer),'r','filled');
-plot([0 40000],[0 0],'k','LineWidth',2); xlabel('Mean PAR (\mumol m^-^2 s^-^1)'); ylabel ('NEE (gC m^-^2 d^-^1)'); ax = gca; set(ax,'FontSize',16);
-axis([0 1000 -5 5]);
-subplot(2,2,4); hold on; scatter(Mean_SWC(these_winter),NEE_d(these_winter),'b','filled');
-scatter(Mean_SWC(these_summer),NEE_d(these_summer),'r','filled');
-plot([0 40],[0 0],'k','LineWidth',2); xlabel('Mean SWC (%)'); ylabel ('NEE (gC m^-^2 d^-^1)'); ax = gca; set(ax,'FontSize',16);
-axis([8 38 -5 5]);
+
+figure; subplot(1,4,1); hold on; 
+plot([0 25],[0 0],'k','LineWidth',1);
+scatter(Min_Ta(these_winter),NEE_d(these_winter),'Marker','o','MarkerEdgeColor',wintercolor,'LineWidth',0.5,'SizeData',10);
+scatter(Min_Ta(these_summer),NEE_d(these_summer),'Marker','o','MarkerEdgeColor',summercolor,'LineWidth',0.5,'SizeData',10);
+xlabel('Min Ta (°C)'); ylabel ('NEE (gC m^-^2 d^-^1)'); ax = gca; set(ax,'FontSize',12);
+binplot(Min_Ta(these_winter),NEE_d(these_winter),12,'b');
+binplot(Min_Ta(these_summer),NEE_d(these_summer),12,'r');
+axis([0 25 -6 6]); ax.XTick = 0:5:25; ax.YTick = -6:2:6;
+
+subplot(1,4,2); hold on; 
+plot([0 10],[0 0],'k','LineWidth',1); 
+scatter(Max_VPD(these_winter),NEE_d(these_winter),'Marker','o','MarkerEdgeColor',wintercolor,'LineWidth',0.5,'SizeData',10);
+scatter(Max_VPD(these_summer),NEE_d(these_summer),'Marker','o','MarkerEdgeColor',summercolor,'LineWidth',0.5,'SizeData',10);
+xlabel('Max VPD (kPa)'); ylabel ('NEE (gC m^-^2 d^-^1)'); ax = gca; set(ax,'FontSize',12);
+binplot(Max_VPD(these_winter),NEE_d(these_winter),12,'b');
+binplot(Max_VPD(these_summer),NEE_d(these_summer),12,'r');
+axis([0 10 -6 6]); ax.XTick = 0:2:10; ax.YTick = -6:2:6; ax.YTickLabel = []; ylabel([]);
+
+subplot(1,4,3); hold on;
+plot([0 40000],[0 0],'k','LineWidth',1); 
+scatter(Mean_PAR(these_winter),NEE_d(these_winter),'Marker','o','MarkerEdgeColor',wintercolor,'LineWidth',0.5,'SizeData',10);
+scatter(Mean_PAR(these_summer),NEE_d(these_summer),'Marker','o','MarkerEdgeColor',summercolor,'LineWidth',0.5,'SizeData',10);
+binplot(Mean_PAR(these_winter),NEE_d(these_winter),12,'b');
+binplot(Mean_PAR(these_summer),NEE_d(these_summer),12,'r');
+xlabel('Mean PAR (\mumol m^-^2 s^-^1)'); ylabel ('NEE (gC m^-^2 d^-^1)'); ax = gca; set(ax,'FontSize',12);
+axis([0 1000 -6 6]); ax.XTick = 0:200:1000; ax.YTick = -6:2:6; ax.YTickLabel = []; ylabel([]);
+
+subplot(1,4,4); hold on; 
+plot([0 40],[0 0],'k','LineWidth',1);
+scatter(Mean_SWC(these_winter),NEE_d(these_winter),'Marker','o','MarkerEdgeColor',wintercolor,'LineWidth',0.5,'SizeData',10);
+scatter(Mean_SWC(these_summer),NEE_d(these_summer),'Marker','o','MarkerEdgeColor',summercolor,'LineWidth',0.5,'SizeData',10);
+binplot(Mean_SWC(these_winter),NEE_d(these_winter),12,'b');
+binplot(Mean_SWC(these_summer),NEE_d(these_summer),12,'r');
+xlabel('Mean SWC (%)'); ylabel ('NEE (gC m^-^2 d^-^1)'); ax = gca; set(ax,'FontSize',12);
+axis([0 40 -6 6]); ax.XTick = 0:10:40; ax.YTick = -6:2:6; ax.YTickLabel = []; ylabel([]);
+
+labelp = {'(a)','(b)','(c)','(d)'};
+for i = 1:4
+    subplot(1,4,i); hold on;
+    text(0.90,0.98,labelp(i),'Units', 'Normalized', 'VerticalAlignment', 'Top');
+    sub_pos = get(gca,'position'); % get subplot axis position
+    set(gca,'position',sub_pos.*[1 1 1.2 1]) % stretch its width and height
+end

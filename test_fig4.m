@@ -92,7 +92,8 @@ clearvars PAR_Data ds_PAR source_PAR;
 % parameters of Mitscherlich for each quantile/bin, along with CI
 % plot
 
-n = 3; % n drivers quantile/bin
+n = 7; % n drivers quantile/bin
+m = 3; % m SWC quantile/bin
 LR_param = cell(2,3,n,3); LR_confint = cell(2,3,n,3);
 bin_median = nan(2,3,n,3);
 Alpha = nan(2,3,n,3); Beta = nan(2,3,n,3); Rd = nan(2,3,n,3);
@@ -114,9 +115,9 @@ for s = 1:2 % 2 seasons, winter or summer
             driver = VPD_30(this_season);
         end
         driver_binedges = quantile(driver,0:1/n:1); %* n bins of driver class, by quantile (n bins with same amount of data) 
-        SWC_binedges = quantile(SWC_ss,0:1/3:1); % 3 quantiles of SWC
+        SWC_binedges = quantile(SWC_ss,0:1/m:1); % 3 quantiles of SWC
         for i=1:n %* n bins/quantile
-            for j = 1:3 % 3 SWC quantile
+            for j = 1:m % 3 SWC quantile
             % driver_bin_middle(s,d,i) = (driver_binedges(i) + driver_binedges(i+1))/2; 
                 this_bin = find(SWC_ss >= SWC_binedges(j) & SWC_ss <= SWC_binedges(j+1) & driver >= driver_binedges(i) & driver <= driver_binedges(i+1)); %* iteration change driver and SWC class 
                 bin_median(s,d,i,j) = median(driver(this_bin)); % x position for figure, makes more sense to be median of driver bin
@@ -154,14 +155,14 @@ for s = 1:2 % winter and summer
             conf_inf = Rd_inf;
         end
         for d = 1:2 % Ta, vpd
-            c = 0.8; % dark blue/red is wet soil
+            c = 0.6; % dark blue/red is wet soil
             for j = 1:3
                 if s == 1
                     colors = [c c 1];
                 elseif s == 2
                     colors = [1 c c];
                 end
-                c = c - 0.4;
+                c = c - 0.3;
                 for i = 1:n % n bins/quantile for each driver
                     param_i(1,i) = param(s,d,i,j);
                     conf_sup_i(1,i) = conf_sup(s,d,i,j);
@@ -191,19 +192,19 @@ subplot(3,2,5); hold on; ylabel('R_d (\mumolm^-^2s^-^1)'); xlabel('Tair (°C)');
 subplot(3,2,6); hold on; xlabel('VPD (kPa)'); set(gca,'yticklabel',[]);
 for i = 1:2
     subplot(3,2,i); hold on;
-    ylim([0 0.04]);
+    ylim([0 0.05]);
     set(gca,'xticklabel',[]);
     set(gca,'FontSize',16);
 end
 for i = 3:4
     subplot(3,2,i); hold on;
-    ylim([4 12]);
+    ylim([0 15]);
     set(gca,'xticklabel',[]);
     set(gca,'FontSize',16);
 end
 for i = 5:6
     subplot(3,2,i); hold on;
-    ylim([0 8]);
+    ylim([0 10]);
     set(gca,'FontSize',16);
 end
 labelp = {'(a)','(b)','(c)','(d)','(e)','(f)'};

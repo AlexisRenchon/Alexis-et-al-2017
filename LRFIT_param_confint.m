@@ -20,7 +20,7 @@ else
     opts.Display = 'Off';
     opts.Lower = [-Inf -Inf 0.2];
     opts.Upper = [Inf Inf Inf];
-    opts.StartPoint = [0.01 8 2];
+    opts.StartPoint = [0.01 6 2];
 
     % Fit model to data.
     [fitresult, gof] = fit( xData, yData, ft, opts );

@@ -44,7 +44,7 @@ clearvars daily_date_cell Data_sum source_summary;
 % LAI data
 % Load raw data (.csv file)
 % Location of raw input file
-source_LAI = 'Input\CUP_LAI_20161021.csv';
+source_LAI = 'Input\CUP_LAI_20170127.csv';
 % Create datastore to access collection of data
 ds_LAI = datastore(source_LAI);
 % Select variable of interest
@@ -120,14 +120,14 @@ end
 
 subplot(5,1,1); hold on; 
 ERplot = plot(daily_date,ER_solo_daily,'LineStyle','none','Marker','o', ...
-    'MarkerFaceColor','r','MarkerEdgeColor','none','MarkerSize',4);
+    'MarkerFaceColor',[1 0.4 0.6],'MarkerEdgeColor','none','MarkerSize',2);
 GPPplot = plot(daily_date,GPP_solo_daily,'LineStyle','none','Marker','o', ...
-    'MarkerFaceColor','g','MarkerEdgeColor','none','MarkerSize',4);
+    'MarkerFaceColor',[0.2314 0.4431 0.3373],'MarkerEdgeColor','none','MarkerSize',2);
 NEEplot = plot(daily_date,NEE_solo_daily,'LineStyle','none','Marker','o', ...
-    'MarkerFaceColor','k','MarkerEdgeColor','none','MarkerSize',4);
+    'MarkerFaceColor','k','MarkerEdgeColor','none','MarkerSize',2);
 ETplot = plot(daily_date,ET_daily,'LineStyle','none','Marker','o', ...
-    'MarkerFaceColor','b','MarkerEdgeColor','none','MarkerSize',4);
-ylabel('Flux (gCm^-^2d^-^1) or (mm)');
+    'MarkerFaceColor',[0.6784 0.9216 1],'MarkerEdgeColor','none','MarkerSize',2);
+ylabel('Flux (gC m^-^2) or (mm)');
 %legend([NEEplot ERplot GPPplot],'NEE','ER','GPP','Location','northouDateTime_CUPide','Orientation','horizontal');
 title('Daily flux');
 
@@ -142,12 +142,35 @@ plot(DateTime_CUP,Ta,'k'); ylabel('T_a_i_r (°C)');
 
 subplot(5,1,4);
 hold on;
-plot(DateTime_CUP,PAR,'k'); ylabel('PAR (\mumolm^-^2s^-^1)');
+plot(DateTime_CUP,PAR,'k'); ylabel('PAR (\mumol m^-^2 s^-^1)');
 
 subplot(5,1,5);
 hold on;
-binplot(datenum(DateTime_LAI),LAI,6,'k');
-title('Canopy dynamic'); ylabel('LAI (m^-^2m^-^2)');
+% binplot(datenum(DateTime_LAI),LAI,6,'k');
+title('Canopy dynamic'); 
+
+
+
+LAIdatenum = datenum(DateTime_LAI);
+[xData, yData] = prepareCurveData( LAIdatenum, LAI );
+% Set up fittype and options.
+ft = fittype( 'smoothingspline' );
+excludedPoints = excludedata( xData, yData, 'Indices', [8 129 131 132] );
+opts = fitoptions( 'Method', 'SmoothingSpline' );
+opts.SmoothingParam = 4.46646226829198e-05;
+opts.Exclude = excludedPoints;
+% Fit model to data.
+[fitresult, gof] = fit( xData, yData, ft, opts );
+beg_LAI = datenum(DateTime_LAI(1)); end_LAI = datenum(DateTime_LAI(length(DateTime_LAI)));
+ax = gca; ax.XLim = [beg_LAI end_LAI];
+plot( fitresult,'k');
+plot(xData,yData,'LineStyle','none','Marker','o', ...
+    'MarkerFaceColor','k','MarkerEdgeColor','none','MarkerSize',2);
+legend off;
+ylabel('LAI (m^-^2 m^-^2)'); xlabel ('2014                       2015                      2016');
+
+
+
 
 i = 1;
 for y = 1:3
@@ -163,17 +186,22 @@ for i = 1:5
     plot([min(datenum(DateTime_CUP)) max(datenum(DateTime_CUP))], [0 0],'k');
     plot([min(datenum(DateTime_CUP)) max(datenum(DateTime_CUP))], [0 0],'k');
     axis([datenum(datetime(2014,1,1)) datenum(datetime(2017,1,1)) yaxismin(i) yaxismax(i)]);
-    ax = gca; set(ax,'FontSize',14); box on;
+    ax = gca; set(ax,'FontSize',12); box on;
     ax.XTick = datenum(month_dt);
-    datetick('x','myy','keeplimits','keepticks');
+%     labels = {'J 2014','F','M','A','M','J','J','A','S','O','N','D','J 2015','F','M','A','M','J','J','A','S','O','N','D','J 2016','F','M','A','M','J','J','A','S','O','N','D','J 2017'};
+%     labels = cellfun(@(x) strrep(x,' ','\newline'), labels,'UniformOutput',false);
+%     ax.XTickLabel = labels;
+    datetick('x','m','keeplimits','keepticks');
     if i ~= 5
     	set(gca,'xticklabel',[]);
     end
 end
 
 % For some weird reason, I have to run the following part AFTER the first
-% part
+% part, and AFTER dimensioning the figure as wished. (e.g. streched
+% horizontally or vertically)
 
+colorax2 = [0 0.749 0.749];
 
 subplot(5,1,2); hold on;
 ax = gca;
@@ -182,9 +210,9 @@ ax2 = axes('Position',ax1_pos,...
 'XAxisLocation','top',...
 'YAxisLocation','right',...
 'Color','none');
-ax2.YColor = 'r';
-line(datenum(DateTime_CUP),SWC_s,'Parent',ax2,'Color','r','LineStyle','-'); 
-axis([min(datenum(DateTime_CUP)) max(datenum(DateTime_CUP)) 0 40]); set(ax2,'FontSize',16); % ax2.YTick = 0:0.5:3;
+ax2.YColor = colorax2;
+line(datenum(DateTime_CUP),SWC_s,'Parent',ax2,'Color',colorax2,'LineStyle','-'); 
+axis([min(datenum(DateTime_CUP)) max(datenum(DateTime_CUP)) 0 40]); set(ax2,'FontSize',12); % ax2.YTick = 0:0.5:3;
 set(gca,'xticklabel',[]); %axes(ax); % set(gca,'yticklabel',[]); % ylabel('VPD (kPa)');
 ylabel('SWC _0_-_8_c_m (%)');
 
@@ -195,9 +223,9 @@ ax2 = axes('Position',ax1_pos,...
 'XAxisLocation','top',...
 'YAxisLocation','right',...
 'Color','none');
-ax2.YColor = 'r';
-line(datenum(DateTime_CUP),VPD,'Parent',ax2,'Color','r','LineStyle','-');
-axis([min(datenum(DateTime_CUP)) max(datenum(DateTime_CUP)) 0 10]); set(ax2,'FontSize',16); % ax2.YTick = 0:0.5:3;
+ax2.YColor = colorax2;
+line(datenum(DateTime_CUP),VPD,'Parent',ax2,'Color',colorax2,'LineStyle','-');
+axis([min(datenum(DateTime_CUP)) max(datenum(DateTime_CUP)) 0 10]); set(ax2,'FontSize',12); % ax2.YTick = 0:0.5:3;
 set(gca,'xticklabel',[]); %axes(ax); % set(gca,'yticklabel',[]); % ylabel('VPD (kPa)');
 ylabel('VPD (kPa)');
 
@@ -208,13 +236,14 @@ ax2 = axes('Position',ax1_pos,...
 'XAxisLocation','top',...
 'YAxisLocation','right',...
 'Color','none');
-ax2.YColor = 'r';
-line(datenum(LF_date),LF_avg,'Parent',ax2,'Color','r','LineStyle','-');
-line(datenum(LF_date),LF_avg + LF_std,'Parent',ax2,'Color','r','LineStyle','--');
-line(datenum(LF_date),LF_avg - LF_std,'Parent',ax2,'Color','r','LineStyle','--');
-axis([min(datenum(DateTime_CUP)) max(datenum(DateTime_CUP)) 0 0.7]); set(ax2,'FontSize',16); % ax2.YTick = 0:0.5:3;
+ax2.YColor = colorax2;
+line(datenum(LF_date),LF_avg,'Parent',ax2,'Color',colorax2,'LineStyle','-');
+line(datenum(LF_date),LF_avg + LF_std,'Parent',ax2,'Color',colorax2,'LineStyle','--');
+line(datenum(LF_date),LF_avg - LF_std,'Parent',ax2,'Color',colorax2,'LineStyle','--');
+axis([min(datenum(DateTime_CUP)) max(datenum(DateTime_CUP)) 0 0.7]); set(ax2,'FontSize',12); % ax2.YTick = 0:0.5:3;
 set(gca,'xticklabel',[]); %axes(ax); % set(gca,'yticklabel',[]); % ylabel('VPD (kPa)');
 ylabel('Litter fall (gb^-^1d^-^1)');
 
-
-
+subplot(5,1,1);
+legend([NEEplot,ERplot,GPPplot,ETplot],'NEE','ER','GPP','ET','Position',[285,475,300,300]);
+legend('boxoff');
