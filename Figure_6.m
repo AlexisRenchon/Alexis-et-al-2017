@@ -178,7 +178,7 @@ plot(x,Diurn_quantiles_h2o_L(:,2),'b','LineWidth',2);
 plot([0 24],[0 0],'k'); axis([0 24 -15 15]); ax = gca; ax.YTick = -15:5:15;
 set(ax,'FontSize',16); box off; ax.XTick = 0:2:24; %set(gca,'xticklabel',[]);
 plot([12 12],[-15 15],'k-.');
-ylabel('NEE or ET (\mu or mmolm^-^2s^-^1)');
+xlabel ('Hour of the day'); ylabel('NEE or ET (\mu or mmolm^-^2s^-^1)');
 text(0.90,0.98,'(a)','Units', 'Normalized', 'VerticalAlignment', 'Top');
 text(0.07,0.57,'+ 1.0','Units', 'Normalized', 'VerticalAlignment', 'Top','Color','k');
 text(0.30,0.48,'- 1.7','Units', 'Normalized', 'VerticalAlignment', 'Top','Color','k');
@@ -247,19 +247,16 @@ line(x,Diurn_quantiles_VPD_NL(:,3),'Parent',ax2,'Color','r','LineStyle',':');
 axis([0 24 0 3]); set(ax2,'FontSize',16); ax2.YTick = 0:0.5:3;
 set(gca,'xticklabel',[]); ylabel('VPD (kPa)');
 
-subplot(3,2,5); hold on;
-i = find((month_t >= 10 | month_t <= 2) & hour(t_s) >= 12 & daytime == 1);
-scatter(PAR(i),NEE_ff_day(i),15,'MarkerFaceColor',light_red,'MarkerEdgeColor','none'); 
-i = find((month_t >= 10 | month_t <= 2) & hour(t_s) < 12 & daytime == 1); 
-scatter(PAR(i),NEE_ff_day(i),15,'MarkerFaceColor',light_blue,'MarkerEdgeColor','none'); 
-i = find((month_t >= 10 | month_t <= 2) & hour(t_s) < 12 & daytime == 1);
-binplot(PAR(i),NEE_ff_day(i),15,'b');
-i = find((month_t >= 10 | month_t <= 2) & hour(t_s) >= 12 & daytime == 1);
-binplot(PAR(i),NEE_ff_day(i),15,'r');
-axis([0 2500 -12 6]);
-ylabel('NEE (\mumol m^-^2 s^-^1)');
-xlabel('PAR (\mumol m^-^2 s^-^1)');
-set(gca,'FontSize',16);
+% subplot(3,2,5); hold on;
+% i = find((month_t >= 10 | month_t <= 2) & hour(t_s) >= 12 & daytime == 1);
+% scatter(PAR(i),NEE_ff_day(i),15,'MarkerFaceColor',light_red,'MarkerEdgeColor','none'); 
+% i = find((month_t >= 10 | month_t <= 2) & hour(t_s) < 12 & daytime == 1); 
+% scatter(PAR(i),NEE_ff_day(i),15,'MarkerFaceColor',light_blue,'MarkerEdgeColor','none'); 
+
+% axis([0 2500 -12 6]);
+% ylabel('NEE (\mumol m^-^2 s^-^1)');
+% xlabel('PAR (\mumol m^-^2 s^-^1)');
+% set(gca,'FontSize',16);
 % % PAR diurnal quantiles (left y-axis) and Ta quantiles (right y-axis),
 % % summer
 % X = [x fliplr(x)];
@@ -296,21 +293,18 @@ set(gca,'FontSize',16);
 % line(x,Diurn_quantiles_Ta_L(:,3),'Parent',ax2,'Color','r','LineStyle',':');
 % axis([0 24 5 35]); set(ax2,'FontSize',12); %ax2.YTick = 0:0.5:3;
 % set(gca,'xticklabel',[]); set(gca,'yticklabel',[]); %ylabel('Ta (C)');
+% 
+% subplot(3,2,6); hold on;
+% i = find(month_t >= 5 & month_t <= 8 & hour(t_s) >= 12 & daytime == 1);
+% scatter(PAR(i),NEE_ff_day(i),15,'MarkerFaceColor',light_red,'MarkerEdgeColor','none'); 
+% i = find(month_t >= 5 & month_t <= 8 & hour(t_s) < 12 & daytime == 1);
+% scatter(PAR(i),NEE_ff_day(i),15,'MarkerFaceColor',light_blue,'MarkerEdgeColor','none');
 
-subplot(3,2,6); hold on;
-i = find(month_t >= 5 & month_t <= 8 & hour(t_s) >= 12 & daytime == 1);
-scatter(PAR(i),NEE_ff_day(i),15,'MarkerFaceColor',light_red,'MarkerEdgeColor','none'); 
-i = find(month_t >= 5 & month_t <= 8 & hour(t_s) < 12 & daytime == 1);
-scatter(PAR(i),NEE_ff_day(i),15,'MarkerFaceColor',light_blue,'MarkerEdgeColor','none');
-i = find(month_t >= 5 & month_t <= 8 & hour(t_s) < 12 & daytime == 1);
-binplot(PAR(i),NEE_ff_day(i),15,'b');
-i = find(month_t >= 5 & month_t <= 8 & hour(t_s) >= 12 & daytime == 1);
-binplot(PAR(i),NEE_ff_day(i),15,'r');
-axis([0 2500 -12 6]);
-set(gca,'yticklabel',[]);
-xlabel('PAR (\mumol m^-^2 s^-^1)');
-legend('Afternoon','Morning');
-set(gca,'FontSize',16);
+% axis([0 2500 -12 6]);
+% set(gca,'yticklabel',[]);
+% xlabel('PAR (\mumol m^-^2 s^-^1)');
+% legend('Afternoon','Morning');
+% set(gca,'FontSize',16);
 % % PAR diurnal quantiles (left y-axis) and Ta quantiles (right y-axis), winter
 % X = [x fliplr(x)];
 % y1 = Diurn_quantiles_PAR_NL(:,1)'; y2 = Diurn_quantiles_PAR_NL(:,3)';
@@ -389,5 +383,70 @@ set(gca,'FontSize',16);
 
 
 
+% 
 
+
+
+% NEE vs. PAR, VPD color, summer and winter panels
+
+lowVPD = [0.7569    0.8667    0.7765];
+mediumVPD = [0.2314    0.4431    0.3373];
+highVPD = [0.0706    0.2118    0.1412];
+morningc = [0.6 0.6 1];
+afternoonc = [1 0.8 0.8];
+
+
+
+subplot(3,2,5); hold on;
+these1 = find((month(DateTime_CUP) >= 10 | month(DateTime_CUP) <= 2) & qc == 0 & qc_Sc == 0 & AGC_c == 0 & u > 0.2 & daytime == 1 & VPD_30 < 1.5);
+these2 = find((month(DateTime_CUP) >= 10 | month(DateTime_CUP) <= 2) & qc == 0 & qc_Sc == 0 & AGC_c == 0 & u > 0.2 & daytime == 1 & VPD_30 >= 1.5 & VPD_30 < 3);
+these3 = find((month(DateTime_CUP) >= 10 | month(DateTime_CUP) <= 2) & qc == 0 & qc_Sc == 0 & AGC_c == 0 & u > 0.2 & daytime == 1 & VPD_30 >= 3);
+scatter(PAR(these1),NEE_c(these1),20,lowVPD,'filled'); %caxis([nanmin(VPD_30) nanmax(VPD_30)]); colormap(customap);
+scatter(PAR(these2),NEE_c(these2),20,mediumVPD,'filled');
+scatter(PAR(these3),NEE_c(these3),20,highVPD,'filled');
+i = find((month_t >= 10 | month_t <= 2) & hour(t_s) < 12 & daytime == 1);
+binplot(PAR(i),NEE_ff_day(i),15,morningc,10);
+i = find((month_t >= 10 | month_t <= 2) & hour(t_s) >= 12 & daytime == 1);
+binplot(PAR(i),NEE_ff_day(i),15,afternoonc,10);
+plot([0 2500],[0 0],'k');
+% binplot(PAR(these1),NEE_c(these1),4,dark_lowVPD,10);
+% binplot(PAR(these2),NEE_c(these2),4,dark_mediumVPD,10);
+% binplot(PAR(these3),NEE_c(these3),4,dark_highVPD,10);
+axis([0 2500 -20 10]); ax = gca; set(ax,'FontSize',16); box off;
+ax.XTick = 0:500:2500;
+% set(gca,'Position',[0 0 1 1]);
+ylabel('NEE (\mumol m^-^2 s^-^1)');
+xlabel('PAR (\mumol m^-^2 s^-^1)');
+%title('Summer (1^s^t Oct - 28^t^h Feb)');
+text(0.90,0.98,'(c)','Units', 'Normalized', 'VerticalAlignment', 'Top');
+
+
+subplot(3,2,6); hold on;
+these1 = find(month(DateTime_CUP) >= 5 & month(DateTime_CUP) <= 8 & qc == 0 & qc_Sc == 0 & AGC_c == 0 & u > 0.2 & daytime == 1 & VPD_30 < 1.5);
+these2 = find(month(DateTime_CUP) >= 5 & month(DateTime_CUP) <= 8 & qc == 0 & qc_Sc == 0 & AGC_c == 0 & u > 0.2 & daytime == 1 & VPD_30 >= 1.5);
+%these3 = find(month(t_s) >= 5 & month(t_s) <= 8 & qc == 0 & qc_Sc == 0 & AGC_c == 0 & u > 0.2 & daytime == 1);
+dotsa = scatter(PAR(these1),NEE_c(these1),20,lowVPD,'filled'); %colormap(customap); caxis([nanmin(VPD_30) nanmax(VPD_30)]);
+dotsb = scatter(PAR(these2),NEE_c(these2),20,mediumVPD,'filled');
+dotsc = scatter(3000,2,20,highVPD,'filled'); % for the legend
+dotsd = plot(3000,2,'LineWidth',3,'Marker','o','MarkerEdgeColor', ...
+    'none','MarkerFaceColor',morningc,'Color',morningc,'MarkerSize',10);
+dotse = plot(3000,2,'LineWidth',3,'Marker','o','MarkerEdgeColor', ...
+    'none','MarkerFaceColor',afternoonc,'Color',afternoonc,'MarkerSize',10);
+i = find(month_t >= 5 & month_t <= 8 & hour(t_s) < 12 & daytime == 1);
+binplot(PAR(i),NEE_ff_day(i),15,morningc,10);
+i = find(month_t >= 5 & month_t <= 8 & hour(t_s) >= 12 & daytime == 1);
+binplot(PAR(i),NEE_ff_day(i),15,afternoonc,10);
+plot([0 2500],[0 0],'k');
+% binplot(PAR(these1),NEE_c(these1),4,dark_lowVPD,10);
+% binplot(PAR(these2),NEE_c(these2),4,dark_mediumVPD,10);
+axis([0 2500 -20 10]); ax = gca; set(ax,'FontSize',16); box off;
+set(gca,'yticklabel',[]); ax.XTick = 0:500:2500;
+% set(gca,'Position',[0 0 1 1]);
+xlabel('PAR (\mumolm^-^2s^-^1)');
+%caxis([nanmin(VPD_30) nanmax(VPD_30)]); %colorbar; h = colorbar; ylabel(h, 'VPD (kPa)');
+%title('Winter (1^s^t May - 31^t^h Aug)');
+text(0.90,0.98,'(d)','Units', 'Normalized', 'VerticalAlignment', 'Top');
+L = legend([dotsa dotsb dotsc dotsd dotse],'VPD < 1.5','VPD [1.5 3]','VPD > 3','Morning','Afternoon');
+L.Location = 'southeast';
+L.FontSize = 8;
 
