@@ -40,6 +40,7 @@ ws = ncread(source_processed,'Ws'); ws = reshape(ws,[],1);
 Rn = ncread(source_processed,'Fn'); Rn = reshape(Rn,[],1);
 ea = ncread(source_processed,'e'); ea = reshape(ea,[],1);
 P = ncread(source_processed,'ps'); P = reshape(P,[],1);
+GEP = ncread(source_processed,'GPP_SOLO_EP'); GEP = reshape(GEP,[],1); 
 ET = ncread(source_processed,'ET'); ET = reshape(ET,[],1);
 Fe = ncread(source_processed,'Fe'); Fe = reshape(Fe,[],1);
 Fh  = ncread(source_processed,'Fh'); Fh = reshape(Fh,[],1);
@@ -70,6 +71,24 @@ DateTime_CUP_cell = Raw_Data.DateTime;
 t_s = datetime(DateTime_CUP_cell,'InputFormat','dd/MM/yyyy HH:mm');
 % clear unused variables
 clearvars DateTime_CUP_cell Raw_Data ds_raw source_raw; 
+
+% PAR data
+% Load raw data (.csv file)
+% Location of raw input file
+source_PAR = 'Input\FACELawn_FACE_diffPAR_20142017_clean.csv';
+% Create datastore to access collection of data
+ds_PAR = datastore(source_PAR);
+% Select variable of interest
+ds_PAR.SelectedVariableNames = {'DateTime','PAR_Avg_mean'}; 
+% Read selected variables, save it in the workspace as a table
+PAR_Data = readall(ds_PAR);
+% Get data from the table, change format if necessary
+PAR = PAR_Data.PAR_Avg_mean;
+DateTime_PAR = PAR_Data.DateTime;
+DateTime_PAR = datetime(DateTime_PAR,'InputFormat','dd/MM/yyyy HH:mm');
+% clear unused variables
+clearvars PAR_Data ds_PAR source_PAR;
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Data processing and analysis
@@ -172,17 +191,25 @@ PET_m_ET = PET-ET;
 DI = sum(PET)/sum(Precip);
 % figure; scatter(vpd,PET_m_ET);
 
+% PAR saturated (> 800) ET, GEP and WUE vs VPD, for SWC quantiles (n quantiles)
 figure; hold on;
-for s = 1:2
+for s = 1:2 % 2 seasons, winter or summer
     if s == 1
-        this_season = find(Month_t >= 5 & Month_t <= 8 & Precip_2daysago < 1 & Precip_1daysago < 0.5 & Precip_halfdayago < 0.2 & vpd > 0.9 & qc_h2o_flux == 0 & AGC_c == 0 & u > 0.2 & daytime == 1 & gc > 0); % winter daytime
+        %this_season = find(Precip_2daysago < 1 & Precip_1daysago < 0.5 & Precip_halfdayago < 0.2 & Month_t >= 5 & Month_t <= 8 & daytime == 1 & qc == 0 & qc_h20_flux == 0 & u > 0.2 & AGC_c == 0 & qc_Sc == 0 & NEE_c > -20 & NEE_c < 15 & PAR > 1000); % winter daytime
+        this_season = find(Precip_2daysago < 1 & Precip_1daysago < 0.5 & Precip_halfdayago < 0.2 & Month_t >= 5 & Month_t <= 8 & daytime == 1 & qc == 0 & qc_h2o_flux == 0 & u > 0.2 & AGC_c == 0 & qc_Sc == 0 & NEE_c > -20 & NEE_c < 15 & PAR > 800); % winter daytime
     elseif s == 2
-        this_season = find((Month_t >= 10 | Month_t <= 2) & Precip_2daysago < 1 & Precip_1daysago < 0.5 & Precip_halfdayago < 0.2 & vpd > 0.9 & qc_h2o_flux == 0 & AGC_c == 0 & u > 0.2 & daytime == 1 & gc > 0); % summer daytime
+        %this_season = find(Precip_2daysago < 1 & Precip_1daysago < 0.5 & Precip_halfdayago < 0.2 & (Month_t >= 10 | Month_t <= 2) & daytime == 1 & qc == 0  & qc_h20_flux == 0 & u > 0.2 & AGC_c == 0 & qc_Sc == 0 & NEE_c > -20 & NEE_c < 15 & PAR > 1000); % summer daytime
+        this_season = find(Precip_2daysago < 1 & Precip_1daysago < 0.5 & Precip_halfdayago < 0.2 & (Month_t >= 10 | Month_t <= 2) & daytime == 1 & qc == 0  & qc_h2o_flux == 0 & u > 0.2 & AGC_c == 0 & qc_Sc == 0 & NEE_c > -20 & NEE_c < 15 & PAR > 800); % summer daytime
     end
+    GEP_s = GEP(this_season); 
+    ET_s = ET(this_season);
+    WUE_s = GEP_s./ET_s;
+    PAR_s = PAR(this_season);
     SWC_ss = SWC(this_season);
     VPD_s = vpd(this_season);
-    gc_relative_s = gc(this_season)/gs_f;
-    SWC_s_binedges = quantile(SWC_ss,0:1/3:1); % 3 quantiles of SWC
+    gc_s = gc(this_season);
+    %VPD_binedges = quantile(VPD_s,0:1/n:1); %* n bins of driver class, by quantile (n bins with same amount of data) 
+    SWC_binedges = quantile(SWC_ss,0:1/3:1); % 3 quantiles of SWC
     c = 0.8; % dark blue/red is wet soil
     for j = 1:3 % SWC
         if s == 1
@@ -191,13 +218,35 @@ for s = 1:2
             colors = [1 c c];
         end
         c = c - 0.4;
-        this_bin = find(SWC_ss >= SWC_s_binedges(j) & SWC_ss <= SWC_s_binedges(j+1)); %* iteration change SWC
-        binplot(VPD_s(this_bin),gc_relative_s(this_bin),4,colors);
+        this_bin = find(SWC_ss >= SWC_binedges(j) & SWC_ss <= SWC_binedges(j+1)); %* iteration change SWC
+        subplot(2,2,1); 
+        binplot_v2(VPD_s(this_bin),GEP_s(this_bin),5,colors,6);
+        subplot(2,2,2); 
+        binplot_v2(VPD_s(this_bin),ET_s(this_bin),5,colors,6);
+        subplot(2,2,3);
+        binplot_v2(VPD_s(this_bin),WUE_s(this_bin),5,colors,6);
+        subplot(2,2,4);
+        binplot_v2(VPD_s(this_bin),gc_s(this_bin),5,colors,6);
     end
 end
-ax = gca; ax.FontSize = 16; xlim([0.5 4.5]); ylim([0.1 1.1]); ax.YTick = 0.1:0.2:1.1; ax.XTick = 0.5:1:4.5;
-xlabel('VPD (kPa)');
-ylabel('Relative surface conductance');
 
+subplot(2,2,1); hold on; ylabel('GEP (\mumol m^-^2 s^-^1)'); box off;
+ax = gca; ax.XTick = 0:1:5; ax.YTick = 4:4:16; ax.FontSize = 12;
+set(gca,'xticklabel',[]); ylim([4 16]); xlim([0 5]);
+subplot(2,2,2); hold on; ylabel('ET (mm)'); box off;
+ax = gca; ax.XTick = 0:1:5; ax.YTick = 0.05:0.05:0.2; ax.FontSize = 12;
+set(gca,'xticklabel',[]); ylim([0.05 0.2]); xlim([0 5]);
+subplot(2,2,3); hold on; ylabel('WUE (\mumolm^-^2 mm^-^1)'); xlabel('VPD (kPa)'); box off;
+ax = gca; ax.XTick = 0:1:5; ax.YTick = 50:25:150; ax.FontSize = 12;
+ylim([50 150]); xlim([0 5]);
+subplot(2,2,4); hold on; ylabel('gs (m s^-^1)'); xlabel('VPD (kPa)'); box off;
+ax = gca; ax.XTick = 0:1:5; %ax.YTick = 50:50:150; %ylim([50 150]); 
+ax.FontSize = 12; xlim([0 5]);
+labelp = {'(a)','(b)','(c)','(d)'};
+for i = 1:4
+    subplot(2,2,i); hold on;
+    text(0.90,0.98,labelp(i),'Units', 'Normalized', 'VerticalAlignment', 'Top');
+    %sub_pos = get(gca,'position'); % get subplot axis position
+    %set(gca,'position',sub_pos.*[1.2 1.2 1 1]) % stretch its width and height
+end
 
-clearvars n i 

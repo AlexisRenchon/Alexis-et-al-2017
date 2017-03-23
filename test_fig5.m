@@ -131,20 +131,20 @@ for s = 1:2 % 2 seasons, winter or summer
         c = c - 0.4;
         this_bin = find(SWC_ss >= SWC_binedges(j) & SWC_ss <= SWC_binedges(j+1)); %* iteration change SWC
         subplot(3,1,1); 
-        binplot(VPD_s(this_bin),GEP_s(this_bin),3,colors);
+        binplot_v2(VPD_s(this_bin),GEP_s(this_bin),6,colors,6);
         subplot(3,1,2); 
-        binplot(VPD_s(this_bin),ET_s(this_bin),3,colors);
+        binplot_v2(VPD_s(this_bin),ET_s(this_bin),6,colors,6);
         subplot(3,1,3);
-        binplot(VPD_s(this_bin),WUE_s(this_bin),3,colors);
+        binplot_v2(VPD_s(this_bin),WUE_s(this_bin),6,colors,6);
     end
 end
 
 subplot(3,1,1); hold on; ylabel('GEP (\mumol m^-^2 s^-^1)'); box off;
-ax = gca; ax.XTick = 0:1:4; ax.YTick = 4:2:16; ax.FontSize = 14; set(gca,'xticklabel',[]); ylim([4 16]);
+ax = gca; ax.XTick = 0:1:4; ax.YTick = 4:2:16; ax.FontSize = 12; set(gca,'xticklabel',[]); ylim([4 16]);
 subplot(3,1,2); hold on; ylabel('ET (mm)'); box off;
-ax = gca; ax.XTick = 0:1:4; ax.YTick = 0.05:0.05:0.2; ax.FontSize = 14; set(gca,'xticklabel',[]); ylim([0.05 0.2]);
+ax = gca; ax.XTick = 0:1:4; ax.YTick = 0.05:0.05:0.2; ax.FontSize = 12; set(gca,'xticklabel',[]); ylim([0.05 0.2]);
 subplot(3,1,3); hold on; ylabel('WUE (\mumolm^-^2 mm^-^1)'); xlabel('VPD (kPa)'); box off;
-ax = gca; ax.XTick = 0:1:4; ax.YTick = 50:50:150; ax.FontSize = 14; ylim([50 150]);
+ax = gca; ax.XTick = 0:1:4; ax.YTick = 50:50:150; ax.FontSize = 12; ylim([50 150]);
 labelp = {'(a)','(b)','(c)'};
 for i = 1:3
     subplot(3,1,i); hold on;
