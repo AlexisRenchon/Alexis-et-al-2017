@@ -88,14 +88,15 @@ clearvars PAR_Data ds_PAR source_PAR;
 % 1. fluxes bigger subplot, try different symbol instead of color (triangle,
 % circle, square for example), smaller marker size
 % 2. PAR in a smaller subplot?
-LF_avg = [0.22 0.26 0.57 0.26 0.38 0.38 0.55 0.03  0.03 0.15 0.07 0.07];
-LF_std = [0.04 0.06 0.11 0.04 0.08 0.08 0.13 0.01 0.01 0.05 0.02 0.02];
+LF_avg = [0.22 0.26 0.57 0.26 0.38 0.38 0.55 0.03 0.03 0.15 0.07 0.07 0.05 0.16 0.26 0.18 0.18 0.16];
+LF_std = [0.04 0.06 0.11 0.04 0.08 0.08 0.13 0.01 0.01 0.05 0.02 0.02 0.03 0.06 0.07 0.07 0.07 0.06];
 for i = 1:5
     LF_date(i) = datetime(2015,i+7,15);
 end
-for i = 1:7
+for i = 1:12
     LF_date(i+5) = datetime(2016,i,15);
 end
+LF_date(18) = datetime(2017,1,15);
 Panel_num = {'a','b','c','d','e'};
 yaxismin = [-8 0 0 0 0.6];
 yaxismax = [8 120 40 3000 1.1];
