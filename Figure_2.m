@@ -22,6 +22,8 @@ source_summary = 'Input\CumberlandPlain_2014_L6_EP_moderate_Summary.xlsx';
 Data_sum = readtable(source_summary,'Sheet','Daily (all)','Range','A3:AL1097','ReadVariableNames',false);
 Date_daily = Data_sum.Var1; Date_daily = datetime(Date_daily,'InputFormat','dd/MM/yyyy hh:mm:ss a');
 ET_daily = Data_sum.Var8;
+ER_d = Data_sum.Var7;
+GPP_d = Data_sum.Var20;
 NEE_d = Data_sum.Var23;
 Month_d = Data_sum.Var36;
 clearvars Data_sum source_summary;
@@ -93,47 +95,146 @@ summercolor = [1 0.7 0.7];
 %plots
 these_winter = find(Month_d >= 5 & Month_d <= 8);
 these_summer = find(Month_d >= 10 | Month_d <= 2);
+sizebp = 6;
+nbp = 4;
 
-figure; subplot(1,4,1); hold on; 
+figure; subplot(3,4,1); hold on; 
 plot([0 25],[0 0],'k','LineWidth',1);
 scatter(Min_Ta(these_winter),NEE_d(these_winter),'Marker','o','MarkerEdgeColor',wintercolor,'LineWidth',0.5,'SizeData',10);
 scatter(Min_Ta(these_summer),NEE_d(these_summer),'Marker','o','MarkerEdgeColor',summercolor,'LineWidth',0.5,'SizeData',10);
 xlabel('Min Ta (°C)'); ylabel ('NEE (gC m^-^2 d^-^1)'); ax = gca; set(ax,'FontSize',12);
-binplot(Min_Ta(these_winter),NEE_d(these_winter),12,'b');
-binplot(Min_Ta(these_summer),NEE_d(these_summer),12,'r');
+binplot(Min_Ta(these_winter),NEE_d(these_winter),nbp,'b',sizebp);
+binplot(Min_Ta(these_summer),NEE_d(these_summer),nbp,'r',sizebp);
 axis([0 25 -6 6]); ax.XTick = 0:5:25; ax.YTick = -6:2:6;
+ax.XTickLabel = []; xlabel([]);
 
-subplot(1,4,2); hold on; 
+subplot(3,4,2); hold on; 
 plot([0 10],[0 0],'k','LineWidth',1); 
 scatter(Max_VPD(these_winter),NEE_d(these_winter),'Marker','o','MarkerEdgeColor',wintercolor,'LineWidth',0.5,'SizeData',10);
 scatter(Max_VPD(these_summer),NEE_d(these_summer),'Marker','o','MarkerEdgeColor',summercolor,'LineWidth',0.5,'SizeData',10);
 xlabel('Max VPD (kPa)'); ylabel ('NEE (gC m^-^2 d^-^1)'); ax = gca; set(ax,'FontSize',12);
-binplot(Max_VPD(these_winter),NEE_d(these_winter),12,'b');
-binplot(Max_VPD(these_summer),NEE_d(these_summer),12,'r');
+binplot(Max_VPD(these_winter),NEE_d(these_winter),nbp,'b',sizebp);
+binplot(Max_VPD(these_summer),NEE_d(these_summer),nbp,'r',sizebp);
 axis([0 10 -6 6]); ax.XTick = 0:2:10; ax.YTick = -6:2:6; ax.YTickLabel = []; ylabel([]);
+ax.XTickLabel = []; xlabel([]);
 
-subplot(1,4,3); hold on;
+subplot(3,4,3); hold on;
 plot([0 40000],[0 0],'k','LineWidth',1); 
 scatter(Mean_PAR(these_winter),NEE_d(these_winter),'Marker','o','MarkerEdgeColor',wintercolor,'LineWidth',0.5,'SizeData',10);
 scatter(Mean_PAR(these_summer),NEE_d(these_summer),'Marker','o','MarkerEdgeColor',summercolor,'LineWidth',0.5,'SizeData',10);
-binplot(Mean_PAR(these_winter),NEE_d(these_winter),12,'b');
-binplot(Mean_PAR(these_summer),NEE_d(these_summer),12,'r');
+binplot(Mean_PAR(these_winter),NEE_d(these_winter),nbp,'b',sizebp);
+binplot(Mean_PAR(these_summer),NEE_d(these_summer),nbp,'r',sizebp);
 xlabel('Mean PAR (\mumol m^-^2 s^-^1)'); ylabel ('NEE (gC m^-^2 d^-^1)'); ax = gca; set(ax,'FontSize',12);
 axis([0 1000 -6 6]); ax.XTick = 0:200:1000; ax.YTick = -6:2:6; ax.YTickLabel = []; ylabel([]);
+ax.XTickLabel = []; xlabel([]);
 
-subplot(1,4,4); hold on; 
+subplot(3,4,4); hold on; 
 plot([0 40],[0 0],'k','LineWidth',1);
 scatter(Mean_SWC(these_winter),NEE_d(these_winter),'Marker','o','MarkerEdgeColor',wintercolor,'LineWidth',0.5,'SizeData',10);
 scatter(Mean_SWC(these_summer),NEE_d(these_summer),'Marker','o','MarkerEdgeColor',summercolor,'LineWidth',0.5,'SizeData',10);
-binplot(Mean_SWC(these_winter),NEE_d(these_winter),12,'b');
-binplot(Mean_SWC(these_summer),NEE_d(these_summer),12,'r');
+binplot(Mean_SWC(these_winter),NEE_d(these_winter),nbp,'b',sizebp);
+binplot(Mean_SWC(these_summer),NEE_d(these_summer),nbp,'r',sizebp);
 xlabel('Mean SWC (%)'); ylabel ('NEE (gC m^-^2 d^-^1)'); ax = gca; set(ax,'FontSize',12);
 axis([0 40 -6 6]); ax.XTick = 0:10:40; ax.YTick = -6:2:6; ax.YTickLabel = []; ylabel([]);
+ax.XTickLabel = []; xlabel([]);
 
 labelp = {'(a)','(b)','(c)','(d)'};
 for i = 1:4
-    subplot(1,4,i); hold on;
+    subplot(3,4,i); hold on;
     text(0.90,0.98,labelp(i),'Units', 'Normalized', 'VerticalAlignment', 'Top');
     sub_pos = get(gca,'position'); % get subplot axis position
-    set(gca,'position',sub_pos.*[1 1 1.2 1]) % stretch its width and height
+    set(gca,'position',sub_pos.*[1 1 1.1 1.3]) % stretch its width and height
+end
+
+subplot(3,4,5); hold on; 
+plot([0 25],[0 0],'k','LineWidth',1);
+scatter(Min_Ta(these_winter),ER_d(these_winter),'Marker','o','MarkerEdgeColor',wintercolor,'LineWidth',0.5,'SizeData',10);
+scatter(Min_Ta(these_summer),ER_d(these_summer),'Marker','o','MarkerEdgeColor',summercolor,'LineWidth',0.5,'SizeData',10);
+xlabel('Min Ta (°C)'); ylabel ('ER (gC m^-^2 d^-^1)'); ax = gca; set(ax,'FontSize',12);
+binplot(Min_Ta(these_winter),ER_d(these_winter),nbp,'b',sizebp);
+binplot(Min_Ta(these_summer),ER_d(these_summer),nbp,'r',sizebp);
+axis([0 25 0 12]); ax.XTick = 0:5:25; ax.YTick = 0:2:12;
+ax.XTickLabel = []; xlabel([]);
+
+subplot(3,4,6); hold on; 
+plot([0 10],[0 0],'k','LineWidth',1); 
+scatter(Max_VPD(these_winter),ER_d(these_winter),'Marker','o','MarkerEdgeColor',wintercolor,'LineWidth',0.5,'SizeData',10);
+scatter(Max_VPD(these_summer),ER_d(these_summer),'Marker','o','MarkerEdgeColor',summercolor,'LineWidth',0.5,'SizeData',10);
+xlabel('Max VPD (kPa)'); ylabel ('NEE (gC m^-^2 d^-^1)'); ax = gca; set(ax,'FontSize',12);
+binplot(Max_VPD(these_winter),ER_d(these_winter),nbp,'b',sizebp);
+binplot(Max_VPD(these_summer),ER_d(these_summer),nbp,'r',sizebp);
+axis([0 10 0 12]); ax.XTick = 0:2:10; ax.YTick = 0:2:12; ax.YTickLabel = []; ylabel([]);
+ax.XTickLabel = []; xlabel([]);
+
+subplot(3,4,7); hold on;
+plot([0 40000],[0 0],'k','LineWidth',1); 
+scatter(Mean_PAR(these_winter),ER_d(these_winter),'Marker','o','MarkerEdgeColor',wintercolor,'LineWidth',0.5,'SizeData',10);
+scatter(Mean_PAR(these_summer),ER_d(these_summer),'Marker','o','MarkerEdgeColor',summercolor,'LineWidth',0.5,'SizeData',10);
+binplot(Mean_PAR(these_winter),ER_d(these_winter),nbp,'b',sizebp);
+binplot(Mean_PAR(these_summer),ER_d(these_summer),nbp,'r',sizebp);
+xlabel('Mean PAR (\mumol m^-^2 s^-^1)'); ylabel ('NEE (gC m^-^2 d^-^1)'); ax = gca; set(ax,'FontSize',12);
+axis([0 1000 0 12]); ax.XTick = 0:200:1000; ax.YTick = 0:2:12; ax.YTickLabel = []; ylabel([]);
+ax.XTickLabel = []; xlabel([]);
+
+subplot(3,4,8); hold on; 
+plot([0 40],[0 0],'k','LineWidth',1);
+scatter(Mean_SWC(these_winter),ER_d(these_winter),'Marker','o','MarkerEdgeColor',wintercolor,'LineWidth',0.5,'SizeData',10);
+scatter(Mean_SWC(these_summer),ER_d(these_summer),'Marker','o','MarkerEdgeColor',summercolor,'LineWidth',0.5,'SizeData',10);
+binplot(Mean_SWC(these_winter),ER_d(these_winter),nbp,'b',sizebp);
+binplot(Mean_SWC(these_summer),ER_d(these_summer),nbp,'r',sizebp);
+xlabel('Mean SWC (%)'); ylabel ('NEE (gC m^-^2 d^-^1)'); ax = gca; set(ax,'FontSize',12);
+axis([0 40 0 12]); ax.XTick = 0:10:40; ax.YTick = 0:2:12; ax.YTickLabel = []; ylabel([]);
+ax.XTickLabel = []; xlabel([]);
+
+labelp = {'(e)','(f)','(g)','(h)'};
+for i = 1:4
+    subplot(3,4,4+i); hold on;
+    text(0.90,0.98,labelp(i),'Units', 'Normalized', 'VerticalAlignment', 'Top');
+    sub_pos = get(gca,'position'); % get subplot axis position
+    set(gca,'position',sub_pos.*[1 1 1.1 1.3]) % stretch its width and height
+end
+
+
+subplot(3,4,9); hold on; 
+plot([0 25],[0 0],'k','LineWidth',1);
+scatter(Min_Ta(these_winter),GPP_d(these_winter),'Marker','o','MarkerEdgeColor',wintercolor,'LineWidth',0.5,'SizeData',10);
+scatter(Min_Ta(these_summer),GPP_d(these_summer),'Marker','o','MarkerEdgeColor',summercolor,'LineWidth',0.5,'SizeData',10);
+xlabel('Min Ta (°C)'); ylabel ('GEP (gC m^-^2 d^-^1)'); ax = gca; set(ax,'FontSize',12);
+binplot(Min_Ta(these_winter),GPP_d(these_winter),nbp,'b',sizebp);
+binplot(Min_Ta(these_summer),GPP_d(these_summer),nbp,'r',sizebp);
+axis([0 25 0 12]); ax.XTick = 0:5:25; ax.YTick = 0:2:12;
+
+subplot(3,4,10); hold on; 
+plot([0 10],[0 0],'k','LineWidth',1); 
+scatter(Max_VPD(these_winter),GPP_d(these_winter),'Marker','o','MarkerEdgeColor',wintercolor,'LineWidth',0.5,'SizeData',10);
+scatter(Max_VPD(these_summer),GPP_d(these_summer),'Marker','o','MarkerEdgeColor',summercolor,'LineWidth',0.5,'SizeData',10);
+xlabel('Max VPD (kPa)'); ylabel ('NEE (gC m^-^2 d^-^1)'); ax = gca; set(ax,'FontSize',12);
+binplot(Max_VPD(these_winter),GPP_d(these_winter),nbp,'b',sizebp);
+binplot(Max_VPD(these_summer),GPP_d(these_summer),nbp,'r',sizebp);
+axis([0 10 0 12]); ax.XTick = 0:2:10; ax.YTick = 0:2:12; ax.YTickLabel = []; ylabel([]);
+
+subplot(3,4,11); hold on;
+plot([0 40000],[0 0],'k','LineWidth',1); 
+scatter(Mean_PAR(these_winter),GPP_d(these_winter),'Marker','o','MarkerEdgeColor',wintercolor,'LineWidth',0.5,'SizeData',10);
+scatter(Mean_PAR(these_summer),GPP_d(these_summer),'Marker','o','MarkerEdgeColor',summercolor,'LineWidth',0.5,'SizeData',10);
+binplot(Mean_PAR(these_winter),GPP_d(these_winter),nbp,'b',sizebp);
+binplot(Mean_PAR(these_summer),GPP_d(these_summer),nbp,'r',sizebp);
+xlabel('Mean PAR (\mumol m^-^2 s^-^1)'); ylabel ('NEE (gC m^-^2 d^-^1)'); ax = gca; set(ax,'FontSize',12);
+axis([0 1000 0 12]); ax.XTick = 0:200:1000; ax.YTick = 0:2:12; ax.YTickLabel = []; ylabel([]);
+
+subplot(3,4,12); hold on; 
+plot([0 40],[0 0],'k','LineWidth',1);
+scatter(Mean_SWC(these_winter),GPP_d(these_winter),'Marker','o','MarkerEdgeColor',wintercolor,'LineWidth',0.5,'SizeData',10);
+scatter(Mean_SWC(these_summer),GPP_d(these_summer),'Marker','o','MarkerEdgeColor',summercolor,'LineWidth',0.5,'SizeData',10);
+binplot(Mean_SWC(these_winter),GPP_d(these_winter),nbp,'b',sizebp);
+binplot(Mean_SWC(these_summer),GPP_d(these_summer),nbp,'r',sizebp);
+xlabel('Mean SWC (%)'); ylabel ('NEE (gC m^-^2 d^-^1)'); ax = gca; set(ax,'FontSize',12);
+axis([0 40 0 12]); ax.XTick = 0:10:40; ax.YTick = 0:2:12; ax.YTickLabel = []; ylabel([]);
+
+labelp = {'(i)','(j)','(k)','(l)'};
+for i = 1:4
+    subplot(3,4,8+i); hold on;
+    text(0.90,0.98,labelp(i),'Units', 'Normalized', 'VerticalAlignment', 'Top');
+    sub_pos = get(gca,'position'); % get subplot axis position
+    set(gca,'position',sub_pos.*[1 1 1.1 1.3]) % stretch its width and height
 end
