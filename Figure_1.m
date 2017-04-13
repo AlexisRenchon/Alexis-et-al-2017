@@ -128,7 +128,44 @@ NEEplot = plot(daily_date,NEE_solo_daily,'LineStyle','none','Marker','o', ...
     'MarkerFaceColor','k','MarkerEdgeColor','none','MarkerSize',2);
 ETplot = plot(daily_date,ET_daily,'LineStyle','none','Marker','o', ...
     'MarkerFaceColor',[0.6784 0.9216 1],'MarkerEdgeColor','none','MarkerSize',2);
-ylabel('Flux (gC m^-^2) or (mm)');
+[xData, yData] = prepareCurveData( datenum(daily_date), ER_solo_daily);
+% Set up fittype and options.
+ft = fittype( 'smoothingspline' );
+opts = fitoptions( 'Method', 'SmoothingSpline' );
+opts.SmoothingParam = 4.46646226829198e-05;
+% Fit model to data.
+[fitresult, gof] = fit( xData, yData, ft, opts );
+h = plot(fitresult); set(h,'color',[1 0.4 0.6]); set(h,'LineWidth',2);
+legend('hide');
+[xData, yData] = prepareCurveData( datenum(daily_date), GPP_solo_daily);
+% Set up fittype and options.
+ft = fittype( 'smoothingspline' );
+opts = fitoptions( 'Method', 'SmoothingSpline' );
+opts.SmoothingParam = 4.46646226829198e-05;
+% Fit model to data.
+[fitresult, gof] = fit( xData, yData, ft, opts );
+h = plot(fitresult); set(h,'color',[0.2314 0.4431 0.3373]); set(h,'LineWidth',2);
+legend('hide');
+[xData, yData] = prepareCurveData( datenum(daily_date), NEE_solo_daily);
+% Set up fittype and options.
+ft = fittype( 'smoothingspline' );
+opts = fitoptions( 'Method', 'SmoothingSpline' );
+opts.SmoothingParam = 4.46646226829198e-05;
+% Fit model to data.
+[fitresult, gof] = fit( xData, yData, ft, opts );
+h = plot(fitresult); set(h,'color','k'); set(h,'LineWidth',2);
+legend('hide');
+[xData, yData] = prepareCurveData( datenum(daily_date), ET_daily);
+% Set up fittype and options.
+ft = fittype( 'smoothingspline' );
+opts = fitoptions( 'Method', 'SmoothingSpline' );
+opts.SmoothingParam = 4.46646226829198e-05;
+% Fit model to data.
+[fitresult, gof] = fit( xData, yData, ft, opts );
+h = plot(fitresult); set(h,'color',[0.6784 0.9216 1]); set(h,'LineWidth',2);
+legend('hide');
+
+ylabel('Flux (gC m^-^2) or (mm)'); xlabel('');
 %legend([NEEplot ERplot GPPplot],'NEE','ER','GPP','Location','northouDateTime_CUPide','Orientation','horizontal');
 title('Daily flux');
 

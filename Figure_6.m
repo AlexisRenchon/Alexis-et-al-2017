@@ -418,7 +418,7 @@ ax.XTick = 0:500:2500;
 ylabel('NEE (\mumol m^-^2 s^-^1)');
 xlabel('PAR (\mumol m^-^2 s^-^1)');
 %title('Summer (1^s^t Oct - 28^t^h Feb)');
-text(0.90,0.98,'(c)','Units', 'Normalized', 'VerticalAlignment', 'Top');
+text(0.90,0.98,'(a)','Units', 'Normalized', 'VerticalAlignment', 'Top');
 
 
 subplot(3,2,6); hold on;
@@ -445,7 +445,7 @@ set(gca,'yticklabel',[]); ax.XTick = 0:500:2500;
 xlabel('PAR (\mumolm^-^2s^-^1)');
 %caxis([nanmin(VPD_30) nanmax(VPD_30)]); %colorbar; h = colorbar; ylabel(h, 'VPD (kPa)');
 %title('Winter (1^s^t May - 31^t^h Aug)');
-text(0.90,0.98,'(d)','Units', 'Normalized', 'VerticalAlignment', 'Top');
+text(0.90,0.98,'(b)','Units', 'Normalized', 'VerticalAlignment', 'Top');
 L = legend([dotsa dotsb dotsc dotsd dotse],'VPD < 1.5','VPD [1.5 3]','VPD > 3','Morning','Afternoon');
 L.Location = 'southeast';
 L.FontSize = 8;
