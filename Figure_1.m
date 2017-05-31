@@ -75,6 +75,22 @@ DateTime_PAR = datetime(DateTime_PAR,'InputFormat','dd/MM/yyyy HH:mm');
 % clear unused variables
 clearvars PAR_Data ds_PAR source_PAR;
 
+% NDVI data
+% Load raw data (.csv file)
+% Location of raw input file
+source_NDVI = 'Input\tower_ndvi_250m.csv';
+% Create datastore to access collection of data
+ds_NDVI = datastore(source_NDVI);
+% Read selected variables, save it in the workspace as a table
+NDVI_Data = readall(ds_NDVI);
+% Get data from the table, change format if necessary
+NDVI = NDVI_Data.NDVI;
+DateTime_NDVI = NDVI_Data.system_time_start;
+DateTime_NDVI = datetime(DateTime_NDVI,'InputFormat','yyyy-MM-dd');
+% clear unused variables
+clearvars NDVI_Data ds_NDVI source_NDVI;
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Figure script
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -97,13 +113,13 @@ for i = 1:12
     LF_date(i+5) = datetime(2016,i,15);
 end
 LF_date(18) = datetime(2017,1,15);
-Panel_num = {'a','b','c','d','e'};
-yaxismin = [-8 0 0 0 0.6];
-yaxismax = [8 120 40 3000 1.1];
+Panel_num = {'a','b','c','d','e','f'};
+yaxismin = [-8 0 0 0 0.6 0.55];
+yaxismax = [8 120 40 3000 1.1 0.85];
 
 figure;
-for i = 1:5
-    subplot(5,1,i); hold on;
+for i = 1:6
+    subplot(6,1,i); hold on;
     for yeari = 2013:2017
         x1 = datenum(datetime(yeari,05,01));
         x2 = datenum(datetime(yeari,08,31));
@@ -119,7 +135,7 @@ for i = 1:5
     text(0.90,0.98,Panel_num(i),'Units', 'Normalized', 'VerticalAlignment', 'Top');
 end
 
-subplot(5,1,1); hold on; 
+subplot(6,1,1); hold on; 
 ERplot = plot(daily_date,ER_solo_daily,'LineStyle','none','Marker','o', ...
     'MarkerFaceColor',[1 0.4 0.6],'MarkerEdgeColor','none','MarkerSize',2);
 GPPplot = plot(daily_date,GPP_solo_daily,'LineStyle','none','Marker','o', ...
@@ -169,20 +185,20 @@ ylabel('Flux (gC m^-^2) or (mm)'); xlabel('');
 %legend([NEEplot ERplot GPPplot],'NEE','ER','GPP','Location','northouDateTime_CUPide','Orientation','horizontal');
 title('Daily flux');
 
-subplot(5,1,2); 
+subplot(6,1,2); 
 hold on;
 plot(daily_date,Precip_daily,'k'); ylabel('Rain (mm)');
 title('Drivers'); 
 
-subplot(5,1,3);
+subplot(6,1,3);
 hold on;
 plot(DateTime_CUP,Ta,'k'); ylabel('T_a_i_r (°C)');
 
-subplot(5,1,4);
+subplot(6,1,4);
 hold on;
 plot(DateTime_CUP,PAR,'k'); ylabel('PAR (\mumol m^-^2 s^-^1)');
 
-subplot(5,1,5);
+subplot(6,1,5);
 hold on;
 % binplot(datenum(DateTime_LAI),LAI,6,'k');
 title('Canopy dynamic'); 
@@ -205,10 +221,7 @@ plot( fitresult,'k');
 plot(xData,yData,'LineStyle','none','Marker','o', ...
     'MarkerFaceColor','k','MarkerEdgeColor','none','MarkerSize',2);
 legend off;
-ylabel('LAI (m^-^2 m^-^2)'); xlabel ('2014                       2015                      2016');
-
-
-
+ylabel('LAI (m^-^2 m^-^2)'); %xlabel ('2014                       2015                      2016');
 
 i = 1;
 for y = 1:3
@@ -219,8 +232,29 @@ for y = 1:3
 end
 month_dt(37) = datetime(2017,1,1);
 
-for i = 1:5
-    subplot(5,1,i); hold on;
+subplot(6,1,6); hold on;
+NDVIdatenum = datenum(DateTime_NDVI);
+[xData, yData] = prepareCurveData( NDVIdatenum, NDVI );
+% Set up fittype and options.
+ft = fittype( 'smoothingspline' );
+opts = fitoptions( 'Method', 'SmoothingSpline' );
+opts.SmoothingParam = 4.46646226829198e-05;
+% Fit model to data.
+[fitresult, gof] = fit( xData, yData, ft, opts );
+beg_NDVI = datenum(DateTime_NDVI(1)); end_NDVI = datenum(DateTime_NDVI(length(DateTime_NDVI)));
+ax = gca; ax.XLim = [beg_NDVI end_NDVI];
+plot( fitresult,'k');
+plot(xData,yData,'LineStyle','none','Marker','o', ...
+    'MarkerFaceColor','k','MarkerEdgeColor','none','MarkerSize',2);
+legend off;
+ylabel('NDVI'); xlabel ('2014                       2015                      2016');
+
+
+
+
+
+for i = 1:6
+    subplot(6,1,i); hold on;
     plot([min(datenum(DateTime_CUP)) max(datenum(DateTime_CUP))], [0 0],'k');
     plot([min(datenum(DateTime_CUP)) max(datenum(DateTime_CUP))], [0 0],'k');
     axis([datenum(datetime(2014,1,1)) datenum(datetime(2017,1,1)) yaxismin(i) yaxismax(i)]);
@@ -230,7 +264,7 @@ for i = 1:5
 %     labels = cellfun(@(x) strrep(x,' ','\newline'), labels,'UniformOutput',false);
 %     ax.XTickLabel = labels;
     datetick('x','m','keeplimits','keepticks');
-    if i ~= 5
+    if i ~= 6
     	set(gca,'xticklabel',[]);
     end
 end
@@ -241,7 +275,7 @@ end
 
 colorax2 = [0 0.749 0.749];
 
-subplot(5,1,2); hold on;
+subplot(6,1,2); hold on;
 ax = gca;
 ax1_pos = ax.Position; % position of first axes
 ax2 = axes('Position',ax1_pos,...
@@ -254,7 +288,7 @@ axis([min(datenum(DateTime_CUP)) max(datenum(DateTime_CUP)) 0 40]); set(ax2,'Fon
 set(gca,'xticklabel',[]); %axes(ax); % set(gca,'yticklabel',[]); % ylabel('VPD (kPa)');
 ylabel('SWC _0_-_8_c_m (%)');
 
-subplot(5,1,3); hold on;
+subplot(6,1,3); hold on;
 ax = gca;
 ax1_pos = ax.Position; % position of first axes
 ax2 = axes('Position',ax1_pos,...
@@ -267,7 +301,7 @@ axis([min(datenum(DateTime_CUP)) max(datenum(DateTime_CUP)) 0 10]); set(ax2,'Fon
 set(gca,'xticklabel',[]); %axes(ax); % set(gca,'yticklabel',[]); % ylabel('VPD (kPa)');
 ylabel('VPD (kPa)');
 
-subplot(5,1,5); hold on;
+subplot(6,1,5); hold on;
 ax = gca;
 ax1_pos = ax.Position; % position of first axes
 ax2 = axes('Position',ax1_pos,...
@@ -282,6 +316,6 @@ axis([min(datenum(DateTime_CUP)) max(datenum(DateTime_CUP)) 0 0.7]); set(ax2,'Fo
 set(gca,'xticklabel',[]); %axes(ax); % set(gca,'yticklabel',[]); % ylabel('VPD (kPa)');
 ylabel('Litter fall (gb^-^1d^-^1)');
 
-subplot(5,1,1);
+subplot(6,1,1);
 legend([NEEplot,ERplot,GPPplot,ETplot],'NEE','ER','GPP','ET','Position',[285,475,300,300]);
 legend('boxoff');
