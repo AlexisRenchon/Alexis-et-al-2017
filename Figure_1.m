@@ -151,7 +151,7 @@ opts = fitoptions( 'Method', 'SmoothingSpline' );
 opts.SmoothingParam = 4.46646226829198e-05;
 % Fit model to data.
 [fitresult, gof] = fit( xData, yData, ft, opts );
-h = plot(fitresult); set(h,'color',[1 0.4 0.6]); set(h,'LineWidth',2);
+ER_spline = plot(fitresult); set(ER_spline,'color',[1 0.4 0.6]); set(ER_spline,'LineWidth',2);
 legend('hide');
 [xData, yData] = prepareCurveData( datenum(daily_date), GPP_solo_daily);
 % Set up fittype and options.
@@ -160,7 +160,7 @@ opts = fitoptions( 'Method', 'SmoothingSpline' );
 opts.SmoothingParam = 4.46646226829198e-05;
 % Fit model to data.
 [fitresult, gof] = fit( xData, yData, ft, opts );
-h = plot(fitresult); set(h,'color',[0.2314 0.4431 0.3373]); set(h,'LineWidth',2);
+GPP_spline = plot(fitresult); set(GPP_spline,'color',[0.2314 0.4431 0.3373]); set(GPP_spline,'LineWidth',2);
 legend('hide');
 [xData, yData] = prepareCurveData( datenum(daily_date), NEE_solo_daily);
 % Set up fittype and options.
@@ -169,7 +169,7 @@ opts = fitoptions( 'Method', 'SmoothingSpline' );
 opts.SmoothingParam = 4.46646226829198e-05;
 % Fit model to data.
 [fitresult, gof] = fit( xData, yData, ft, opts );
-h = plot(fitresult); set(h,'color','k'); set(h,'LineWidth',2);
+NEE_spline = plot(fitresult); set(NEE_spline,'color','k'); set(NEE_spline,'LineWidth',2);
 legend('hide');
 [xData, yData] = prepareCurveData( datenum(daily_date), ET_daily);
 % Set up fittype and options.
@@ -178,7 +178,7 @@ opts = fitoptions( 'Method', 'SmoothingSpline' );
 opts.SmoothingParam = 4.46646226829198e-05;
 % Fit model to data.
 [fitresult, gof] = fit( xData, yData, ft, opts );
-h = plot(fitresult); set(h,'color',[0.6784 0.9216 1]); set(h,'LineWidth',2);
+ET_spline = plot(fitresult); set(ET_spline,'color',[0.6784 0.9216 1]); set(ET_spline,'LineWidth',2);
 legend('hide');
 
 ylabel('Flux (gC m^-^2) or (mm)'); xlabel('');
@@ -222,6 +222,7 @@ plot(xData,yData,'LineStyle','none','Marker','o', ...
     'MarkerFaceColor','k','MarkerEdgeColor','none','MarkerSize',2);
 legend off;
 ylabel('LAI (m^-^2 m^-^2)'); %xlabel ('2014                       2015                      2016');
+xlabel('');
 
 i = 1;
 for y = 1:3
@@ -268,6 +269,8 @@ for i = 1:6
     	set(gca,'xticklabel',[]);
     end
 end
+
+
 
 % For some weird reason, I have to run the following part AFTER the first
 % part, and AFTER dimensioning the figure as wished. (e.g. streched
@@ -317,5 +320,6 @@ set(gca,'xticklabel',[]); %axes(ax); % set(gca,'yticklabel',[]); % ylabel('VPD (
 ylabel('Litter fall (gb^-^1d^-^1)');
 
 subplot(6,1,1);
-legend([NEEplot,ERplot,GPPplot,ETplot],'NEE','ER','GPP','ET','Position',[285,475,300,300]);
-legend('boxoff');
+h = legend([NEE_spline,ER_spline,GPP_spline,ET_spline],'NEE','ER','GPP','ET');%,'Position',[285,475,300,300]);
+set(h,'color','none'); set(h,'EdgeColor','none');
+%legend('boxoff');
